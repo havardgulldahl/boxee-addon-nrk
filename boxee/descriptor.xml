@@ -1,0 +1,16 @@
+<app>
+  <id>NRK-hg</id>
+  <name>NRK -- Norwegian Broadcasting</name>
+  <version>0.1</version>
+  <description>Enjoy a diverse selection of national and international programming from the Norwegian Public Broadcaster, NRK</description>
+  <thumb>http://boxee.lurtgjort.no/thumbs/NRK</thumb>
+  <repository>http://boxee.lurtgjort.no/apps</repository>
+  <media>video</media>
+  <copyright>http://github.com/havardgulldahl</copyright>
+  <email>havard@gulldahl.no</email>
+  <type>skin</type>
+  <startWindow>start</startWindow>
+  <platform>all</platform>
+  <minversion>0.9.21</minversion>
+  <test-app>true</test-app>
+</app>
