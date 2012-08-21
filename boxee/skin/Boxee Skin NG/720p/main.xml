@@ -1,9 +1,13 @@
 <?xml version="1.0"?>
+<!--
+This file is part of the Boxee NRK App by havard.gulldahl@nrk.no
+
+Released under a GPL3 license, see LICENSE.txt
+-->
 <window type="window" id="14000">
    <defaultcontrol always="true">120</defaultcontrol>
    <allowoverlay>no</allowoverlay>
    <onload lang="python"><![CDATA[
-counter.updateLabel()
 ]]></onload>
    <controls>
       <control type="group">
@@ -24,12 +28,14 @@ counter.updateLabel()
             <color>white</color>
             <label>Play Count:0[CR]Declined Count:0</label>
          </control>
-         <control type="grouplist" id="200">
+         <control type="wraplist" id="200">
              <posy>120</posy>
              <posx>30</posx>
-             <ondown>120</ondown>
+						 <width>250</width>
+						 <height>500</height>
+             <ondown>3</ondown>
              <itemgap>3</itemgap>
-             <orientation>horizontal</orientation>
+             <orientation>vertical</orientation>
              <control type="button" id="201">
                   <width>150</width>
                   <height>40</height>
@@ -37,14 +43,15 @@ counter.updateLabel()
                   <font>font21b</font>
                   <align>center</align>
                   <textoffsety>7</textoffsety>
-                  <aligny>top</aligny>
+										<aligny>top</aligny>
                   <textcolor>ffbdbdbd</textcolor>
                   <focusedcolor>ffffffff</focusedcolor>
                   <texturefocus>ba_overlay.png</texturefocus>
                   <texturenofocus>ba_overlay2.png</texturenofocus>
                   <onclick lang="python"><![CDATA[
-items = mc.GetDirectory('rss://dir.boxee.tv/apps/revision3/feed/show/filmriot/MP4-hd30')
-mc.GetActiveWindow().GetList(120).SetItems(items)
+import hla
+channels = [hls.HLSListItem(chan) for chan in hls.NRKSTREAMS.keys()]
+mc.GetActiveWindow().GetList(120).SetItems(channels)
 ]]>
 </onclick>
               </control>
@@ -172,10 +179,6 @@ title = item.GetLabel()
 confirm = mc.ShowDialogConfirm('Boxee Basic Python Application', 'Would you like to play "'+title+'"?', 'Cancel', 'Play')
 if confirm:
    mc.GetPlayer().Play(item)
-   counter.play_count += 1
-else:
-   counter.declined_count += 1
-counter.updateLabel()
 ]]></onclick>
                </content>
             </control>
