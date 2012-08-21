@@ -26,19 +26,20 @@ NRKSTREAMS = { # from takoi in http://forum.xbmc.org/showthread.php?tid=52824&pa
 }
 
 def HLSListItem(url, **kwargs):
-  """Create a playable ListItem from an HLS resource"""
-	quality = kwargs.get('quality', 'A') #set playlist stream bandwith, 0, 1, A (low, high, adaptive)
-	title = kwargs.get('title', 'My funky HLSListItem')
-	if url in NRKSTREAMS.keys(): # 'url' is a key in NRKSTREAMS dict
-		title = url
-		url = NRKSTREAMS(url)
-	playlist_url = "playlist://%s?%s" % (quote_plus(url), urlencode({'quality':quality}))
+    """Create a playable ListItem from an HLS resource"""
+    quality = kwargs.get('quality', 'A') #set playlist stream bandwith, 0, 1, A (low, high, adaptive)
+    title = kwargs.get('title', 'My funky HLSListItem')
+    if url in NRKSTREAMS.keys(): # 'url' is a key in NRKSTREAMS dict
+        title = url
+        url = NRKSTREAMS(url)
+    playlist_url = "playlist://%s?%s" % (quote_plus(url), urlencode({'quality':quality}))
 
-	print playlist_url
+    print playlist_url
 
-	item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_EPISODE)
-	item.SetPath(playlist_url)
-	item.SetLabel(title)
-	item.SetContentType('application/vnd.apple.mpegurl')
-	return item # and then mc.GetPlayer().Play(item)
-	
+    item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_EPISODE)
+    item.SetPath(playlist_url)
+    item.SetLabel(title)
+    item.SetContentType('application/vnd.apple.mpegurl')
+    return item # and then mc.GetPlayer().Play(item)
+    
+    

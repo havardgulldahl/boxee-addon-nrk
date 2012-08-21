@@ -1,4 +1,4 @@
-<app>
+ï»¿<app>
 <!--
 This file is part of the Boxee NRK App by havard.gulldahl@nrk.no
 
@@ -13,7 +13,7 @@ Released under a GPL3 license, see LICENSE.txt
   <media>video</media>
   <copyright>http://github.com/havardgulldahl</copyright>
   <email>havard.gulldahl@nrk.no</email>
-	<author>Håvard Gulldahl (NRK)</author>
+  <author>Håvard Gulldahl (NRK)</author>
   <type>skin</type>
   <startWindow>start</startWindow><!-- let start.py create our gui -->
   <platform>all</platform><!-- all platforms can access NRK -->

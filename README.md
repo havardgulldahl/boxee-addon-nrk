@@ -4,7 +4,7 @@
 
 This app -- code and artwork -- is released under a nice GPL3 license.
 
-So you can do what you want with it, as long as you share your results. It's fun that way!
+So you can do what you want with it, as long as you share your results. Isn't that fun!
 (More details available, read LICENSE.txt) 
 
 ### This app is based upon hard work -- by others ###

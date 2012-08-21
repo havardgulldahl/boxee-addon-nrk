@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <!--
 This file is part of the Boxee NRK App by havard.gulldahl@nrk.no
 
@@ -8,6 +8,7 @@ Released under a GPL3 license, see LICENSE.txt
    <defaultcontrol always="true">120</defaultcontrol>
    <allowoverlay>no</allowoverlay>
    <onload lang="python"><![CDATA[
+import hls
 ]]></onload>
    <controls>
       <control type="group">
@@ -49,7 +50,6 @@ Released under a GPL3 license, see LICENSE.txt
                   <texturefocus>ba_overlay.png</texturefocus>
                   <texturenofocus>ba_overlay2.png</texturenofocus>
                   <onclick lang="python"><![CDATA[
-import hla
 channels = [hls.HLSListItem(chan) for chan in hls.NRKSTREAMS.keys()]
 mc.GetActiveWindow().GetList(120).SetItems(channels)
 ]]>
