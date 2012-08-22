@@ -18,18 +18,9 @@ import hls
          <control type="image">
             <width>1280</width>
             <height>720</height>
-            <texture>ba_background.png</texture>
+            <texture>ba_background.jpg</texture>
          </control>
-         <control type="label" id="110">
-            <posy>50</posy>
-            <posx>1260</posx>
-            <width>400</width>
-            <align>right</align>
-            <font>font21b</font>
-            <color>white</color>
-            <label>Play Count:0[CR]Declined Count:0</label>
-         </control>
-         <control type="wraplist" id="200">
+         <control type="grouplist" id="200">
              <posy>120</posy>
              <posx>30</posx>
 						 <width>250</width>
@@ -50,7 +41,7 @@ import hls
                   <texturefocus>ba_overlay.png</texturefocus>
                   <texturenofocus>ba_overlay2.png</texturenofocus>
                   <onclick lang="python"><![CDATA[
-channels = [hls.HLSListItem(chan) for chan in hls.NRKSTREAMS.keys()]
+channels = hls.NRKHLSItemList()
 mc.GetActiveWindow().GetList(120).SetItems(channels)
 ]]>
 </onclick>
@@ -70,25 +61,6 @@ mc.GetActiveWindow().GetList(120).SetItems(channels)
                   <onclick lang="python"><![CDATA[
 items = mc.ListItems()
 mc.GetActiveWindow().GetList(120).SetItems(items)
-]]>
-</onclick>
-              </control>
-             <control type="button" id="203">
-                  <width>200</width>
-                  <height>40</height>
-                  <label>CLEAR COUNTER</label>
-                  <font>font21b</font>
-                  <align>center</align>
-                  <textoffsety>7</textoffsety>
-                  <aligny>top</aligny>
-                  <textcolor>ffbdbdbd</textcolor>
-                  <focusedcolor>ffffffff</focusedcolor>
-                  <texturefocus>ba_overlay.png</texturefocus>
-                  <texturenofocus>ba_overlay2.png</texturenofocus>
-                  <onclick lang="python"><![CDATA[
-counter.play_count = 0
-counter.declined_count = 0
-counter.updateLabel()
 ]]>
 </onclick>
               </control>
@@ -175,22 +147,16 @@ counter.updateLabel()
                   <onclick lang="python"><![CDATA[
 list = mc.GetActiveWindow().GetList(120)
 item = list.GetItem(list.GetFocusedItem())
+mc.LogInfo("clicked item: %s" % item)
 title = item.GetLabel()
+mc.LogInfo("clicked title: %s" % title)
 confirm = mc.ShowDialogConfirm('Boxee Basic Python Application', 'Would you like to play "'+title+'"?', 'Cancel', 'Play')
 if confirm:
-   mc.GetPlayer().Play(item)
+    mc.LogInfo("play item: %s" % item)
+    mc.GetPlayer().Play(item)
 ]]></onclick>
                </content>
             </control>
-         </control>
-         <control type="label">
-            <posy>600</posy>
-            <posx>1260</posx>
-            <width>400</width>
-            <align>right</align>
-            <font>font21</font>
-            <color>white</color>
-            <label>Boxee Basic Python Application[CR]Demo[CR]Version 1.0</label>
          </control>
       </control>
    </controls>

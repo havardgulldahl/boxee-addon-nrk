@@ -31,15 +31,25 @@ def HLSListItem(url, **kwargs):
     title = kwargs.get('title', 'My funky HLSListItem')
     if url in NRKSTREAMS.keys(): # 'url' is a key in NRKSTREAMS dict
         title = url
-        url = NRKSTREAMS(url)
+        url = NRKSTREAMS[url]
     playlist_url = "playlist://%s?%s" % (quote_plus(url), urlencode({'quality':quality}))
-
-    print playlist_url
-
-    item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_EPISODE)
+    mc.LogDebug(playlist_url)
+    item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_CLIP)
     item.SetPath(playlist_url)
     item.SetLabel(title)
     item.SetContentType('application/vnd.apple.mpegurl')
     return item # and then mc.GetPlayer().Play(item)
     
-    
+def NRKHLSItemList():
+    mylist = mc.ListItems()
+    for name,url in NRKSTREAMS.iteritems():
+        try:
+            n = HLSListItem(url, title=name)
+            n.SetProviderSource("nrk")
+            n.SetIcon("icon.png")
+            n.SetDescription("NRK, channel <i>%s</i>" % title, True)
+            mylist.append(n)
+        except:
+            pass
+    mc.LogDebug("returning hls list: %s" % mylist)
+    return mylist
