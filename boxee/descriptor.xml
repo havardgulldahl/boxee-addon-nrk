@@ -8,12 +8,12 @@ Released under a GPL3 license, see LICENSE.txt
   <name>NRK -- Norwegian Broadcasting</name>
   <version>0.1</version>
   <description>Enjoy a diverse selection of national and international programming from the Norwegian Public Broadcaster, NRK</description>
-  <thumb>http://boxee.lurtgjort.no/thumbs/NRK</thumb>
-  <repository>http://boxee.lurtgjort.no/apps</repository>
+  <thumb>http://apps.lurtgjort.no/boxee/thumbs/NRK</thumb>
+  <repository>http://apps.lurtgjort.no/boxee</repository>
   <media>video</media>
   <copyright>http://github.com/havardgulldahl</copyright>
   <email>havard.gulldahl@nrk.no</email>
-  <author>Håvard Gulldahl (NRK)</author>
+  <author>HÃ¥vard Gulldahl (NRK)</author>
   <type>skin</type>
   <startWindow>start</startWindow><!-- let start.py create our gui -->
   <platform>all</platform><!-- all platforms can access NRK -->
