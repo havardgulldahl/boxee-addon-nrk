@@ -14,23 +14,27 @@
 '''
 
 import re
-
-import BeautifulSoup
-html_decode = lambda string: BeautifulSoup.BeautifulSoup(string,
-    convertEntities=BeautifulSoup.BeautifulSoup.HTML_ENTITIES).contents[0]
-
-import CommonFunctions
-parseDOM = CommonFunctions.parseDOM
-
 import requests
-requests = requests.session(headers={'User-Agent':'xbmc.org'})
+import HTMLParser
+import StorageServer
+import CommonFunctions
+from itertools import repeat
+from subs import get_subtitles
+
+html_decode = HTMLParser.HTMLParser().unescape
+parseDOM = CommonFunctions.parseDOM
+requests = requests.session(headers={'User-Agent':'xbmc.org','X-Requested-With':'XMLHttpRequest'})
+cache = StorageServer.StorageServer('nrk.no', 336)
+
+def _get_cached(url):
+  f = lambda x: requests.get(x).json
+  return cache.cacheFunction(f, url)
 
 
 def parse_by_letter(arg):
   """ returns: </serie/newton> or </program/koif45000708> """
-  url = "http://tv.nrk.no/programmer/%s?filter=rettigheter" % arg
+  url = "http://tv.nrk.no/programmer/%s?filter=rettigheter&ajax=true" % arg
   html = requests.get(url).text
-  html = parseDOM(html, 'div', {'id':'programList'})
   return _parse_list(html)
 
 def parse_by_category(arg):
@@ -49,7 +53,9 @@ def _parse_list(html):
   titles = parseDOM(html, 'a')
   titles = map(html_decode, titles)
   urls = parseDOM(html, 'a', ret='href')
-  return titles, urls
+  thumbs = [ _thumb_url(url) for url in urls ]
+  fanart = [ _fanart_url(url) for url in urls ]
+  return titles, urls, thumbs, fanart
 
 
 def parse_recommended():
@@ -63,19 +69,20 @@ def parse_recommended():
   titles = [ "%s - %s" % (t1, t2) for t1, t2 in zip(titles1, titles2) ]
   
   urls = parseDOM(h1s, 'a', ret='href')
-  imgs = re.findall(r'1900":"([^"]+)', html)
-  return titles, urls, imgs
+  thumbs = [ _thumb_url(url) for url in urls ]
+  fanart = [ _fanart_url(url) for url in urls ]
+  return titles, urls, thumbs, fanart
 
 
 def parse_most_recent():
-  url = "http://tv.nrk.no/listobjects/recentlysent"
-  html = requests.get(url).text
-  urls = parseDOM(html, 'a', {'class':'listobject-link'}, ret='href')
-  thumbs = parseDOM(html, 'img', ret='src')[::2] #extract even elements
-  html = ''.join(parseDOM(html, 'span', {'class':'listobject-title'}))
-  titles = parseDOM(html, 'strong')
+  url = "http://tv.nrk.no/listobjects/recentlysent.json/page/0"
+  elems = requests.get(url).json['ListObjectViewModels']
+  titles = [ e['Title'] for e in elems ]
   titles = map(html_decode, titles)
-  return titles, urls, thumbs
+  urls = [ e['Url'] for e in elems ]
+  thumbs = [ e['ImageUrl'] for e in elems ]
+  fanart = [ _fanart_url(url) for url in urls ]
+  return titles, urls, thumbs, fanart
 
 
 def parse_seasons(arg):
@@ -87,34 +94,43 @@ def parse_seasons(arg):
   titles = parseDOM(html, 'a', {'class':'seasonLink'})
   titles = [ "Sesong %s" % html_decode(t) for t in titles ]
   ids = parseDOM(html, 'a', {'class':'seasonLink'}, ret='href')
-  return titles, ids
+  thumbs = repeat(_thumb_url(arg))
+  fanart = repeat(_fanart_url(arg))
+  return titles, ids, thumbs, fanart
 
 
 def parse_episodes(series_id, season_id):
   """ returns: </serie/aktuelt-tv/nnfa50051612/16-05-2012..> """
   url = "http://tv.nrk.no/program/Episodes/%s/%s" % (series_id, season_id)
   html = requests.get(url).text
-  html = parseDOM(html, 'table', {'class':'episodeTable'})
   trs = parseDOM(html, 'tr', {'class':'has-programtooltip episode-row js-click *'})
   titles = [ parseDOM(tr, 'a', {'class':'p-link'})[0] for tr in trs ]
   titles = map(html_decode, titles)
   ids = [ parseDOM(tr, 'a', {'class':'p-link'}, ret='href')[0] for tr in trs ]
   ids = [ e.split('http://tv.nrk.no')[1] for e in ids ]
   descr = [lambda x=x: _get_descr(x) for x in ids ]
-  return titles, ids, descr
+  thumbs = repeat(_thumb_url(series_id))
+  fanart = repeat(_fanart_url(series_id))
+  return titles, ids, thumbs, fanart, descr
 
 
 def parse_media_url(video_id, bitrate):
   bitrate = 4 if bitrate > 4 else bitrate
   url = "http://nrk.no/serum/api/video/%s" % video_id
-  url = requests.get(url).json['mediaURL']
+  url = _get_cached(url)['mediaURL']
   url = url.replace('/z/', '/i/', 1)
   url = url.rsplit('/', 1)[0]
   url = url + '/index_%s_av.m3u8' % bitrate
   return url
 
+def _thumb_url(id):
+  return "http://nrk.eu01.aws.af.cm/t/%s" % id.strip('/')
+
+def _fanart_url(id):
+  return "http://nrk.eu01.aws.af.cm/f/%s" % id.strip('/')
+
 def _get_descr(url):
   url = "http://nrk.no/serum/api/video/%s" % url.split('/')[3]
-  descr = requests.get(url).json['description']
+  descr = _get_cached(url)['description']
   return descr
 
