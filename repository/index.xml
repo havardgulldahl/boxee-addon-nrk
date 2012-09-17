@@ -1,0 +1,23 @@
+<apps>
+   <!--
+This file is part of the Boxee NRK App by havard.gulldahl@nrk.no
+
+Released under a GPL3 license, see LICENSE.txt
+-->
+   <app>
+	  <id>no.lurtgjort.apps.boxee</id>
+	  <name>NRK -- Norwegian Broadcasting</name>
+	  <version>0.1</version>
+	  <description>Enjoy a diverse selection of national and international programming from the Norwegian Public Broadcaster, NRK</description>
+	  <thumb>http://apps.lurtgjort.no/thumbs/NRK.png</thumb>
+	  <repository>http://apps.lurtgjort.no/boxee</repository>
+	  <media>video</media>
+	  <copyright>http://github.com/havardgulldahl</copyright>
+	  <email>havard.gulldahl@nrk.no</email>
+	  <author>H. Gulldahl (NRK)</author>
+	  <type>skin</type>
+	  <startWindow>start</startWindow><!-- let start.py create our gui -->
+	  <platform>all</platform><!-- all platforms can access NRK -->
+	  <minversion>0.9.21</minversion>
+  </app>
+</apps>

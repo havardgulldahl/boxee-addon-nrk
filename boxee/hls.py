@@ -33,7 +33,6 @@ def HLSListItem(url, **kwargs):
         title = url
         url = NRKSTREAMS[url]
     playlist_url = "playlist://%s?%s" % (quote_plus(url), urlencode({'quality':quality}))
-    mc.LogDebug(playlist_url)
     item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_CLIP)
     item.SetPath(playlist_url)
     item.SetLabel(title)
@@ -47,9 +46,9 @@ def NRKHLSItemList():
             n = HLSListItem(url, title=name)
             n.SetProviderSource("nrk")
             n.SetIcon("icon.png")
-            n.SetDescription("NRK, channel <i>%s</i>" % title, True)
+            n.SetDescription("NRK, channel <i>%s</i>" % name, True)
             mylist.append(n)
         except:
-            pass
-    mc.LogDebug("returning hls list: %s" % mylist)
+            # pass
+			raise
     return mylist
