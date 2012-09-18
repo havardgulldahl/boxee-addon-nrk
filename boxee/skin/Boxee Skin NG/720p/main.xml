@@ -9,7 +9,12 @@ Released under a GPL3 license, see LICENSE.txt
    <allowoverlay>no</allowoverlay>
    <onload lang="python"><![CDATA[
 import hls
-print hls
+def play(item):
+	confirm = mc.ShowDialogConfirm('NRK', 'Would you like to play "%s"?' % item.GetLabel(), 'Cancel', 'Play')
+	if confirm:
+		mc.LogInfo("play item: %s" % item)
+		mc.GetPlayer().Play(item)
+
 ]]></onload>
    <controls>
       <control type="group">
@@ -24,30 +29,48 @@ print hls
          <control type="grouplist" id="200">
 <!--              <posy>120</posy>
              <posx>30</posx> -->
-						 <width>250</width>
-						 <height>100</height>
+			 <width>909</width>
+			 <height>300</height>
              <ondown>120</ondown>
-             <!-- <itemgap>3</itemgap> -->
+             <itemgap>3</itemgap>
              <orientation>horizontal</orientation>
              <control type="button" id="201">
-                  <width>150</width>
-                  <height>40</height>
-                  <label>LOADs</label>
-                  <font>font21b</font>
-                  <align>center</align>
-                  <textoffsety>7</textoffsety>
-										<aligny>top</aligny>
-                  <textcolor>ffbdbdbd</textcolor>
-                  <focusedcolor>ffffffff</focusedcolor>
-                  <texturefocus>ba_overlay.png</texturefocus>
-                  <texturenofocus>ba_overlay2.png</texturenofocus>
+                  <width>300</width>
+                  <height>169</height>
+				  <pulseonselect>true</pulseonselect>
+                  <texturefocus>nrk1.png</texturefocus>
+                  <texturenofocus>nrk1.png</texturenofocus>
                   <onclick lang="python"><![CDATA[
-channels = hls.NRKHLSItemList()
-mc.GetActiveWindow().GetList(120).SetItems(channels)
+channel = hls.LiveChannel('NRK1')
+play(channel)
 ]]>
 </onclick>
               </control>
-         </control>
+             <control type="button" id="202">
+                  <width>300</width>
+                  <height>169</height>
+				  <pulseonselect>true</pulseonselect>
+                  <texturefocus>nrk2.png</texturefocus>
+                  <texturenofocus>nrk2.png</texturenofocus>
+                  <onclick lang="python"><![CDATA[
+channel = hls.LiveChannel('NRK2')
+play(channel)
+]]>
+</onclick>
+              </control>
+             <control type="button" id="203">
+                  <width>300</width>
+                  <height>169</height>
+				  <pulseonselect>true</pulseonselect>
+                  <texturefocus>nrk3.png</texturefocus>
+                  <texturenofocus>nrk3.png</texturenofocus>
+                  <onclick lang="python"><![CDATA[
+channel = hls.LiveChannel('NRK3')
+play(channel)
+]]>
+</onclick>
+              </control>
+         </control><!-- end grouplist top buttons -->
          <control type="group">
             <posy>160</posy>
             <control type="image">

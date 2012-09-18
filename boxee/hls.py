@@ -12,9 +12,9 @@ import mc
 from urllib import quote_plus, urlencode
 
 NRKSTREAMS = { # from takoi in http://forum.xbmc.org/showthread.php?tid=52824&page=32
-"NRK1":"http://nrk1-i.akamaihd.net/hls/live/201543/nrk1/master_Layer5.m3u8", # NRK1 live
-"NRK2":"http://nrk2-i.akamaihd.net/hls/live/201544/nrk2/master_Layer5.m3u8", # NRK2 live
-"NRK3":"http://nrk3-i.akamaihd.net/hls/live/201545/nrk3/master_Layer5.m3u8", # NRK3/NRKSuper live
+# "NRK1":"http://nrk1-i.akamaihd.net/hls/live/201543/nrk1/master_Layer5.m3u8", # NRK1 live
+# "NRK2":"http://nrk2-i.akamaihd.net/hls/live/201544/nrk2/master_Layer5.m3u8", # NRK2 live
+# "NRK3":"http://nrk3-i.akamaihd.net/hls/live/201545/nrk3/master_Layer5.m3u8", # NRK3/NRKSuper live
 "VID23":"http://hlswebvid23-i.akamaihd.net/hls/live/204296/hlswebvid23/master_Layer6.m3u8",
 "VID24":"http://hlswebvid24-i.akamaihd.net/hls/live/204297/hlswebvid24/master_Layer6.m3u8",
 "VID25":"http://hlswebvid25-i.akamaihd.net/hls/live/204298/hlswebvid25/master_Layer6.m3u8",
@@ -25,14 +25,28 @@ NRKSTREAMS = { # from takoi in http://forum.xbmc.org/showthread.php?tid=52824&pa
 
 }
 
+NRKBITRATES = ['380','659','1394','2410','3660']
+
+NRKLIVESTREAMS = {
+  "NRK1": "http://nrk1us-f.akamaihd.net/i/nrk1us_0@79328/index_%s_av-b.m3u8?sd=10&rebase=on",
+  "NRK2": "http://nrk2us-f.akamaihd.net/i/nrk2us_0@79327/index_%s_av-b.m3u8?sd=10&rebase=on",
+  "NRK3": "http://nrk3us-f.akamaihd.net/i/nrk3us_0@79326/index_%s_av-b.m3u8?sd=10&rebase=on",
+}
+
+def LiveChannel(channelname, bitrate=2):
+	"Return a playable ListItem from one of the live channel streams"
+	item = HLSListItem(NRKLIVESTREAMS[channelname] % NRKBITRATES[bitrate], title=channelname)
+	item.SetProviderSource("nrk")
+	item.SetIcon("%s.png" % channelname.lower())
+	item.SetDescription("%s, live channel by Norwegian Broadcasting" % channelname, True)
+	return item
+
 def HLSListItem(url, **kwargs):
     """Create a playable ListItem from an HLS resource"""
     quality = kwargs.get('quality', 'A') #set playlist stream bandwith, 0, 1, A (low, high, adaptive)
     title = kwargs.get('title', 'My funky HLSListItem')
-    if url in NRKSTREAMS.keys(): # 'url' is a key in NRKSTREAMS dict
-        title = url
-        url = NRKSTREAMS[url]
     playlist_url = "playlist://%s?%s" % (quote_plus(url), urlencode({'quality':quality}))
+    #mc.LogDebug(playlist_url)
     item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_CLIP)
     item.SetPath(playlist_url)
     item.SetLabel(title)
@@ -51,4 +65,5 @@ def NRKHLSItemList():
         except:
             # pass
 			raise
+    mc.LogDebug("returning hls list: %s" % mylist)
     return mylist
