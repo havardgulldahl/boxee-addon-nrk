@@ -15,6 +15,10 @@ def play(item):
 		mc.LogInfo("play item: %s" % item)
 		mc.GetPlayer().Play(item)
 
+import datetime
+now = datetime.datetime.now().hour
+ISSUPERTIME = now < 20 and now > 6
+print "IS SUPER TIME: %s" % ISSUPERTIME
 ]]></onload>
    <controls>
       <control type="group">
@@ -27,48 +31,44 @@ def play(item):
             <texture>ba_background.jpg</texture>
          </control>
          <control type="grouplist" id="200">
-<!--              <posy>120</posy>
-             <posx>30</posx> -->
-			 <width>909</width>
-			 <height>300</height>
+<!--              <posy>120</posy> -->
+             <posx>30</posx>
+			 <width>500</width>
+			 <height>60</height>
              <ondown>120</ondown>
-             <itemgap>3</itemgap>
+             <itemgap>15</itemgap>
              <orientation>horizontal</orientation>
              <control type="button" id="201">
-                  <width>300</width>
-                  <height>169</height>
+                  <width>98</width>
+                  <height>38</height>
 				  <pulseonselect>true</pulseonselect>
-                  <texturefocus>nrk1.png</texturefocus>
-                  <texturenofocus>nrk1.png</texturenofocus>
-                  <onclick lang="python"><![CDATA[
-channel = hls.LiveChannel('NRK1')
-play(channel)
-]]>
-</onclick>
+                  <texturefocus>nrk1-active.png</texturefocus>
+                  <texturenofocus>nrk1-inactive.png</texturenofocus>
+                  <onclick lang="python"><![CDATA[play(hls.LiveChannel('NRK1'))]]></onclick>
               </control>
              <control type="button" id="202">
-                  <width>300</width>
-                  <height>169</height>
+                  <width>98</width>
+                  <height>38</height>
 				  <pulseonselect>true</pulseonselect>
-                  <texturefocus>nrk2.png</texturefocus>
-                  <texturenofocus>nrk2.png</texturenofocus>
-                  <onclick lang="python"><![CDATA[
-channel = hls.LiveChannel('NRK2')
-play(channel)
-]]>
-</onclick>
+                  <texturefocus>nrk2-active.png</texturefocus>
+                  <texturenofocus>nrk2-inactive.png</texturenofocus>
+                  <onclick lang="python"><![CDATA[play(hls.LiveChannel('NRK2'))]]></onclick>
               </control>
              <control type="button" id="203">
-                  <width>300</width>
-                  <height>169</height>
+                  <width>98</width>
+                  <height>38</height>
 				  <pulseonselect>true</pulseonselect>
-                  <texturefocus>nrk3.png</texturefocus>
-                  <texturenofocus>nrk3.png</texturenofocus>
-                  <onclick lang="python"><![CDATA[
-channel = hls.LiveChannel('NRK3')
-play(channel)
-]]>
-</onclick>
+                  <texturefocus>nrk3-active.png</texturefocus>
+                  <texturenofocus>nrk3-inactive.png</texturenofocus>
+                  <onclick lang="python"><![CDATA[play(hls.LiveChannel('NRK3'))]]></onclick>
+              </control>
+             <control type="button" id="204">
+                  <width>141</width>
+                  <height>38</height>
+				  <pulseonselect>true</pulseonselect>
+                  <texturefocus>nrksuper-active.png</texturefocus>
+                  <texturenofocus>nrksuper-inactive.png</texturenofocus>
+                  <onclick lang="python"><![CDATA[play(hls.LiveChannel('NRK3'))]]></onclick>
               </control>
          </control><!-- end grouplist top buttons -->
          <control type="group">
