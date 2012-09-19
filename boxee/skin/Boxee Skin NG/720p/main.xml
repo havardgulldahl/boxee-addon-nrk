@@ -15,6 +15,9 @@ def play(item):
 		mc.LogInfo("play item: %s" % item)
 		mc.GetPlayer().Play(item)
 
+def setbitrate(idx):
+	print "setbitrate:%s" % idx
+		
 import datetime
 now = datetime.datetime.now().hour
 ISSUPERTIME = now < 20 and now > 6
@@ -30,12 +33,33 @@ print "IS SUPER TIME: %s" % ISSUPERTIME
             <height>720</height>
             <texture>ba_background.jpg</texture>
          </control>
+		<control type="multiselect" id="210">
+		   <description>My first multiselect control</description>
+		   <posx>1080</posx>
+		   <posy>0</posy>
+		   <width>200</width>
+		   <height>200</height>
+		   <visible>true</visible>
+		   <label>Bitrate:[ONCLICK setbitrate(0)]X1[/ONCLICK] [ONCLICK setbitrate(1)]X2[/ONCLICK] [ONCLICK setbitrate(2)]X3[/ONCLICK] [ONCLICK setbitrate(3)]X4[/ONCLICK]</label>
+		   <font>font20</font>
+		   <textcolor>FF000000</textcolor>
+		   <focusedcolor>white</focusedcolor>
+		   <disabledcolor>80FFFFFF</disabledcolor>
+		   <aligny>center</aligny>
+		   <textoffsetx></textoffsetx>
+		   <textoffsety></textoffsety>
+		   <onup>-</onup>
+		   <ondown>120</ondown>
+		   <onleft>200</onleft>
+		   <onright>-</onright>
+		</control>		 
          <control type="grouplist" id="200">
-<!--              <posy>120</posy> -->
-             <posx>30</posx>
+             <!-- <posy>120</posy> -->
+             <posx>100</posx>
 			 <width>500</width>
 			 <height>60</height>
              <ondown>120</ondown>
+			 <onright>210</onright>
              <itemgap>15</itemgap>
              <orientation>horizontal</orientation>
              <control type="button" id="201">
@@ -71,13 +95,13 @@ print "IS SUPER TIME: %s" % ISSUPERTIME
                   <onclick lang="python"><![CDATA[play(hls.LiveChannel('NRK3'))]]></onclick>
               </control>
          </control><!-- end grouplist top buttons -->
+		<control type="image">
+            <posy>50</posy>
+		   <width>1280</width>
+		   <height>3</height>
+		   <texture>black.png</texture>
+		</control>
          <control type="group">
-            <posy>160</posy>
-            <control type="image">
-               <width>1280</width>
-               <height>3</height>
-               <texture>black.png</texture>
-            </control>
 <!--             <control type="image">
                <width>1280</width>
                <height>400</height>
