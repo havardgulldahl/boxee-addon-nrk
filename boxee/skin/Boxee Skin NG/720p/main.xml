@@ -15,9 +15,12 @@ def play(item):
 		mc.LogInfo("play item: %s" % item)
 		mc.GetPlayer().Play(item)
 
-def setbitrate(idx):
+def setBitrate(idx):
 	print "setbitrate:%s" % idx
-		
+
+def formatEpg(seq):
+	return ("\n".join( ["%s\n>> %s" % (e["PlannedStartTimeShortString"], e["Title"]) for e in seq] ).encode('utf-8'))
+	
 import datetime
 now = datetime.datetime.now().hour
 ISSUPERTIME = now < 20 and now > 6
@@ -28,6 +31,13 @@ else:
 	hidecontrol = 204
 	
 mc.GetWindow(14000).GetControl(hidecontrol).SetVisible(False)
+
+# fill epg
+mc.GetActiveWindow().GetLabel(261).SetLabel(formatEpg(getEpg('NRK1')))
+mc.GetActiveWindow().GetLabel(262).SetLabel(formatEpg(getEpg('NRK2')))
+mc.GetActiveWindow().GetLabel(263).SetLabel(formatEpg(getEpg('NRK3')))
+
+
 ]]></onload>
    <controls>
       <control type="group">
@@ -109,7 +119,7 @@ mc.GetWindow(14000).GetControl(hidecontrol).SetVisible(False)
          </control><!-- end grouplist top buttons -->
 		<control type="image">
             <posy>160</posy>
-		   <width>1280</width>
+		   <width>700</width>
 		   <height>2</height>
 		   <texture>black.png</texture>
 		</control><!-- end black line -->
@@ -123,6 +133,23 @@ mc.GetWindow(14000).GetControl(hidecontrol).SetVisible(False)
 		 <fadetime>200</fadetime>
 		 <texture border="5" flipY="true" flipX="false">black.png</texture>
 		</control>
+		<control type="label" id="261">
+		   <description>epg 1</description>
+		   <posx>100</posx>
+		   <posy>270</posy>
+		   <width>170</width>
+		   <height>400</height>
+		   <align>left</align>
+		   <aligny>top</aligny>
+		   <scroll>false</scroll>
+		   <label>Some text goes here</label>
+		   <number></number>
+		   <haspath>false</haspath>
+		   <font>font18</font>
+		   <textcolor>white</textcolor>
+		   <shadowcolor>grey</shadowcolor>
+		   <wrapmultiline>true</wrapmultiline>
+		</control>
 		<control type="image" id="252">
 		 <description>live image 2</description>
 		 <posx>298</posx>
@@ -132,6 +159,23 @@ mc.GetWindow(14000).GetControl(hidecontrol).SetVisible(False)
 		 <colordiffuse>FF88FFFF</colordiffuse>
 		 <fadetime>200</fadetime>
 		 <texture border="5" flipY="true" flipX="false">black.png</texture>
+		</control>
+		<control type="label" id="262">
+		   <description>epg 2</description>
+		   <posx>298</posx>
+		   <posy>270</posy>
+		   <width>170</width>
+		   <height>400</height>
+		   <align>left</align>
+		   <aligny>top</aligny>
+		   <scroll>false</scroll>
+		   <label>Some text goes here</label>
+		   <number></number>
+		   <haspath>false</haspath>
+		   <font>font17</font>
+		   <textcolor>white</textcolor>
+		   <shadowcolor>grey</shadowcolor>
+		   <wrapmultiline>true</wrapmultiline>
 		</control>
 		<control type="image" id="253">
 		 <description>live image 3</description>
@@ -143,6 +187,23 @@ mc.GetWindow(14000).GetControl(hidecontrol).SetVisible(False)
 		 <fadetime>200</fadetime>
 		 <texture border="5" flipY="true" flipX="false">black.png</texture>
 		</control>
+		<control type="label" id="263">
+		   <description>epg 3</description>
+		   <posx>496</posx>
+		   <posy>270</posy>
+		   <width>170</width>
+		   <height>400</height>
+		   <align>left</align>
+		   <aligny>top</aligny>
+		   <scroll>false</scroll>
+		   <label>Some text goes here</label>
+		   <number></number>
+		   <haspath>false</haspath>
+		   <font>font17</font>
+		   <textcolor>white</textcolor>
+		   <shadowcolor>grey</shadowcolor>
+		   <wrapmultiline>true</wrapmultiline>
+		</control>
          <control type="group">
 <!--             <control type="image">
                <width>1280</width>
@@ -150,11 +211,11 @@ mc.GetWindow(14000).GetControl(hidecontrol).SetVisible(False)
                <texture>ba_overlay.png</texture>
             </control> -->
             <control type="image">
-               <posy>397</posy>
-               <width>1280</width>
-               <height>3</height>
+               <posy>700</posy>
+               <width>700</width>
+               <height>2</height>
                <texture>black.png</texture>
-            </control>
+            </control><!-- end black line -->
             <control type="image">
                <posy>20</posy>
                <posx>910</posx>
