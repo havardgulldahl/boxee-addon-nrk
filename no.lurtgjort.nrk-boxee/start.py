@@ -66,11 +66,11 @@ def listLive():
 	ISSUPERTIME = now < 20 and now > 6
 	print "IS SUPER TIME: %s" % ISSUPERTIME
 
-	def nrkItem(channel, title, thumb):
-		print "nrkItem: %s %s %s" % (channel, title , thumb)
+	def nrkItem(channel, title, playthumb):
+		print "nrkItem: %s %s %s" % (channel, title , playthumb)
 		i = hls.LiveChannel(channel) 
 		i.SetProviderSource('Norsk Rikskringkasting')
-		i.SetThumbnail(thumb)
+		i.SetThumbnail(playthumb)
 		i.SetTitle(title)
 		return i
 	
@@ -78,15 +78,15 @@ def listLive():
 	nrk1t, nrk2t, nrk3t = getNowPlayingThumbs()
 	print repr(nrk1t)
 
-	nrk1 = nrkItem('NRK1', 'NRK 1', nrk1t['url'])
-	nrk2 = nrkItem('NRK2', 'NRK 2', nrk2t['url'])
-	nrk3 = nrkItem('NRK3', ISSUPERTIME and 'NRK Super' or 'NRK3', nrk3t['url'])
+	nrk1 = nrkItem('nrk1', nrk1t['title'], nrk1t['url'])
+	nrk2 = nrkItem('nrk2', nrk2t['title'], nrk2t['url'])
+	nrk3 = nrkItem('nrk3', nrk3t['title'], nrk3t['url'])
 
 	# nrk1.SetProperty('streamid', 'id')
 	
-	# nrk1.SetDescription(formatEpg(getEpg('NRK1')))
-	# nrk2.SetDescription(formatEpg(getEpg('NRK2')))
-	# nrk3.SetDescription(formatEpg(getEpg('NRK3')))
+	nrk1.SetDescription(formatEpg(getEpg('NRK1')))
+	nrk2.SetDescription(formatEpg(getEpg('NRK2')))
+	nrk3.SetDescription(formatEpg(getEpg('NRK3')))
 	
 	items.append(nrk1)
 	items.append(nrk2)

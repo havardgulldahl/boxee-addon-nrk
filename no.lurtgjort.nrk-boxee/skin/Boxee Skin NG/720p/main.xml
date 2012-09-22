@@ -192,61 +192,76 @@ menuClicked(item)
 			<onup>-</onup>
 			<ondown>-</ondown>
 			<onleft lang="python">100</onleft>
-			<itemlayout width="176" height="270">
+			<itemlayout width="250" height="270">
 				<control type="label">
 					<posx>75</posx>
-					<posy>245</posy>
-					<width>150</width>
+					<posy>145</posy>
+					<width>200</width>
 					<height>25</height>
 					<font>font20b</font>
 					<align>center</align>
 					<aligny>center</aligny>
-					<label>$INFO[ListItem.Label]</label>
+					<label>$INFO[ListItem.Title]</label>
 					<textcolor>white</textcolor>
 				</control>
 				<control type="image">
 					<posx>10</posx>
 					<posy>30</posy>
-					<width>150</width>
-					<height>85</height>
+					<width>172</width>
+					<height>97</height>
 					<align>center</align>
-					<texture>$INFO[ListItem.Thumb]</texture>
+					<texture>$INFO[ListItem.Label].png</texture>
 				</control>
 			</itemlayout>
 			<focusedlayout width="176" height="270">
 				<control type="label">
 					<posx>75</posx>
-					<posy>245</posy>
-					<width>150</width>
+					<posy>145</posy>
+					<width>200</width>
 					<height>25</height>
 					<font>font20b</font>
 					<align>center</align>
 					<aligny>center</aligny>
-					<label>$INFO[ListItem.Label]</label>
+					<label>$INFO[ListItem.Title]</label>
 					<textcolor>white</textcolor>
 					<selectedcolor>DD171717</selectedcolor>
 					<scroll>true</scroll>
 					<scrollspeed>30</scrollspeed>
 				</control>
-				
-				<control type="image">
-					<posx>-2</posx>
-					<posy>18</posy>
-					<width>167</width>
-					<height>227</height>
-					<align>center</align>
-					<texture>active.png</texture>
-				</control>
-				
+
 				<control type="image">
 					<posx>10</posx>
 					<posy>30</posy>
-					<width>150</width>
-					<height>85</height>
+					<width>172</width>
+					<height>97</height>
 					<align>center</align>
-					<!-- <aspectratio>scale</aspectratio> -->
 					<texture>$INFO[ListItem.Thumb]</texture>
 				</control>
+				
+				<control type="image">
+					<posx>8</posx>
+					<posy>28</posy>
+					<width>172</width>
+					<height>97</height>
+					<align>center</align>
+					<texture>listobjecthover.png</texture>
+				</control>
+
+				<control type="label">
+					<posx>7</posx>
+					<posy>195</posy>
+					<width>180</width>
+					<height>500</height>
+					<font>font19</font>
+					<align>left</align>
+					<aligny>top</aligny>
+					<label>$INFO[ListItem.property(Description)]</label>
+					<textcolor>white</textcolor>
+					<!-- <selectedcolor>DD171717</selectedcolor> -->
+					<wrapmultiline>true</wrapmultiline>
+				</control>
+
+				
 			</focusedlayout>
 			<content type="action">
 				<onclick lang="python">
