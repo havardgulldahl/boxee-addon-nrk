@@ -5,7 +5,7 @@ This file is part of the Boxee NRK App by havard.gulldahl@nrk.no
 Released under a GPL3 license, see LICENSE.txt
 -->
    <app>
-	  <id>no.lurtgjort.apps.boxee</id>
+	  <id>no.lurtgjort.nrk-boxee</id>
 	  <name>NRK -- Norwegian Broadcasting</name>
 	  <version>0.1</version>
 	  <description>Enjoy a diverse selection of national and international programming from the Norwegian Public Broadcaster, NRK</description>

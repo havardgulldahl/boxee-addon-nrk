@@ -36,7 +36,7 @@ NRKLIVESTREAMS = {
 def LiveChannel(channelname, bitrate=2):
 	"Return a playable ListItem from one of the live channel streams"
 	item = HLSListItem(NRKLIVESTREAMS[channelname] % NRKBITRATES[bitrate], title=channelname)
-	item.SetProviderSource("nrk")
+	item.SetProviderSource('Norsk Rikskringkasting')
 	item.SetIcon("%s.png" % channelname.lower())
 	item.SetDescription("%s, live channel by Norwegian Broadcasting" % channelname, True)
 	return item
