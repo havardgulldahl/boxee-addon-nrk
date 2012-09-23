@@ -12,7 +12,7 @@ import urlparse
 import datetime
 import hls
 import simplejson
-from BeautifulSoup import BeautifulSoup
+from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
 
 def utf8(str):
 	return unicode(str).encode('utf-8')
@@ -29,7 +29,7 @@ def main():
 	mc.HideDialogWait()
 
 def initMenu():
-	menu = ['Direkte', 'Aktuelt', 'Sjangrer', 'Program', 'Favoritter', 'Søk', ]
+	menu = ['Direkte', 'Aktuelt', 'Sjanger', 'Program', 'Favoritter', 'Søk', ]
 	items = mc.ListItems()
 	for p in menu:
 		item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_CLIP)
@@ -55,8 +55,10 @@ def menuClicked(item):
 	elif lbl in ['Favoritter', ]:
 		progs = getFavorites()
 		listProgs(progs)
+	elif lbl == 'Sjanger':
+		listGenres()
 	elif lbl == 'Søk':
-		pass
+		print "Search"
 	mc.HideDialogWait()
 	
 def listLive():
@@ -76,7 +78,7 @@ def listLive():
 	
 	# get thumbs
 	nrk1t, nrk2t, nrk3t = getNowPlayingThumbs()
-	print repr(nrk1t)
+	# print repr(nrk1t)
 
 	nrk1 = nrkItem('nrk1', nrk1t['title'], nrk1t['url'])
 	nrk2 = nrkItem('nrk2', nrk2t['title'], nrk2t['url'])
@@ -102,10 +104,107 @@ def listLive():
 def listProgs(progs):
 	print "listprogs: %s" % progs
 	
-def GET(location):
+def listVideoItems(items):
+	print "listitems: %s" % items
+	
+ 	mc.GetActiveWindow().GetList(130).SetItems(items)
+
+	mc.GetActiveWindow().GetList(120).SetVisible(False)
+	mc.GetActiveWindow().GetList(110).SetVisible(False)
+	mc.GetActiveWindow().GetList(130).SetVisible(True)
+	mc.GetActiveWindow().GetList(130).SetFocus()	
+	
+
+
+def listGenres():
+	items = mc.ListItems()
+	for genre in getGenres():
+		item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_CLIP)
+		item.SetLabel(genre['title'])
+		item.SetTitle(genre['title'])
+		item.SetProperty('url', genre['url'])
+		items.append(item)
+
+	mc.GetActiveWindow().GetList(120).SetItems(items)
+	
+	mc.GetActiveWindow().GetList(110).SetVisible(False)
+	mc.GetActiveWindow().GetList(130).SetVisible(False)
+	mc.GetActiveWindow().GetList(120).SetVisible(True)
+	mc.GetActiveWindow().GetList(120).SetFocus()
+
+def genreClicked(genre):
+	print "genre cliked: %s" % genre.GetLabel()
+	setLabel(99, genre.GetLabel())
+	mc.ShowDialogWait()
+	#http://tv.nrk.no/listobjects/recentlysentbycategory/barn.json/page/1
+	url = 'http://tv.nrk.no/listobjects/recentlysentbycategory/%s.json/page/0' % os.path.basename(genre.GetProperty('url'))
+	print url
+	# {"ListObjectViewModels":[{"Title":"Danseakademiet 26:27","ImageUrl":"http://gfx.nrk.no/djo0urdjx-AdYOjj1csrrgU66bPW3i_pzxxfXn9ym8yg","Url":"/serie/danseakademiet/msui33007510/sesong-2/episode-26","ViewCount":0,"Categories":[{"Url":"/kategori/barn","Id":"barn","DisplayValue":"Barn"}]}
+	jsondoc = GET(url)
+	res = simplejson.loads(jsondoc.read().decode('utf-8'))
+	items = mc.ListItems()
+	for i in res['ListObjectViewModels']:
+		item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_EPISODE)
+		item.SetGenre(genre.GetLabel())
+		item.SetLabel(utf8(i['Title']))
+		item.SetTitle(utf8(i['Title']))
+		item.SetThumbnail(utf8(i['ImageUrl']))
+		item.SetProperty('url', utf8(i['Url']))
+		item.SetProperty('viewCount', utf8(i['ViewCount']))
+		iteminfo = parsePath(utf8(i['Url']))
+		if iteminfo.has_key('id'): # this will get us our mediaURL later on
+			item.SetProperty('id', iteminfo['id'])
+		if iteminfo.has_key('showtitle'): # TV Show title
+			item.SetTVShowTitle(iteminfo['showtitle'])
+		if iteminfo.has_key('airdate'): # date first aired, datetime.date object
+			item.SetDate(iteminfo['airdate'].year, iteminfo['airdate'].month, iteminfo['airdate'].day)
+		if iteminfo.has_key('season'): # TV series season	
+			item.SetSeason(iteminfo['season'])
+		if iteminfo.has_key('episode'): # TV series episode
+			item.SetSeason(iteminfo['episode'])
+		items.append(item)
+	listVideoItems(items)
+	mc.HideDialogWait()
+
+def parsePath(path):
+	# break up paths to extract as much info as possible
+	# examples:
+	# /serie/moffene/obui12005409/22-09-2012
+	# /serie/danseakademiet/msui33007510/sesong-2/episode-26
+	
+	print "parsePath: %s" % path
+	components = [p for p in path.split('/') if len(p) > 0]
+	ret = {}
+	if components[0] == 'serie':
+		ret['type'] = 'series'
+		ret['showtitle'] = components[1]
+		ret['id'] = components[2]
+		try:
+			d, m, y = [int(p, 10) for p in components[3].split('-')] # split date
+			ret['airdate'] = datetime.date(y, m, d)
+		except ValueError:
+			# not a date at components[3], try to parse season and episode
+			try:
+				_info = "%s %s" % (components[4], components[5])
+				ret['season'], ret['episode'] = map(int, re.match(r'sesong-(\d+)\ episode-(\d+)', _info).groups())
+			except:
+				pass
+	else:
+		# fall back to id parsing
+		try:
+			ret['id'] = re.search(r'([a-zA-Z]{4}+d{8})', path).group(1)
+		except:
+			raise
+	print "parsed: %s" % repr(ret)
+	return ret
+	
+def GET(location, **kwargs):
 	parsed = urlparse.urlparse(location)
 	conn = httplib.HTTPConnection(parsed[1])
-	conn.request("GET", parsed[2])
+	config = {'User-Agent': 'Curl 7.21.1'}
+	config.update(kwargs)
+	print config
+	conn.request("GET", parsed[2], headers=config)
 	res = conn.getresponse()
 	print res.status, res.reason
 	return res
@@ -119,27 +218,44 @@ def getEpg(channelname):
 def getNowPlayingThumbs():
 	#http://tv.nrk.no/getnownext/nrk3?districtChannel=	
 	stub = GET("http://tv.nrk.no/getnownext/nrk3")
-	htmlstub = BeautifulSoup(stub.read().decode("utf-8"))
+	htmlstub = BeautifulSoup(stub.read().decode("utf-8"), convertEntities=BeautifulStoneSoup.ALL_ENTITIES)
 	ret = []
 	for el in htmlstub.findAll('img'):
 		ret.append( { 'title': utf8(el['alt']), 'url': utf8(el['src']) } )
 	return ret
 
-def putImage(url):
-	f = os.path.join(mc.GetTempDir(), os.path.basename(url))
-	print "putImage: %s -> %s" % (url, f)
-	o = open(f, 'w+b')
-	o.write(GET(url).read())
-	print "closing..."
-	o.close()
-	return f
+def getGenres():
+	#http://tv.nrk.no/kategori/
+	stub = GET("http://tv.nrk.no/kategori/")
+	html = BeautifulSoup(stub.read().decode("utf-8"), convertEntities=BeautifulStoneSoup.ALL_ENTITIES)
+	ret = []
+	for el in html.find(id='categoryList').findAll('a'):
+		ret.append( { 'title': utf8(el.string), 'url': utf8(el['href']) } )
+	return ret	
 
 def play(item):
 	confirm = mc.ShowDialogConfirm('NRK', 'Would you like to play "%s"?' % item.GetLabel(), 'Cancel', 'Play')
 	if confirm:
-		mc.LogInfo("play item: %s" % item)
+		print "playing item :%s" % repr(item.GetPath())
+		if not item.GetPath():
+			mc.ShowDialogWait()
+			item.SetPath(getPathForId(item.GetProperty("id")))
+			mc.HideDialogWait()
 		mc.GetPlayer().Play(item)
 
+def getPathForId(videoid, bitrate=4):
+	if bitrate > 4: bitrate = 4
+	url = "http://nrk.no/serum/api/video/%s" % videoid
+	print "getting path for id: %s" % url
+	json = simplejson.loads(GET(url, Accept='application/json').read().decode('utf-8'))
+	print json
+	url = utf8(json['mediaURL'])
+	print repr(url)
+	url = url.replace('/z/', '/i/', 1)
+	url = url.rsplit('/', 1)[0]
+	url = url + '/index_%s_av.m3u8' % bitrate
+	return url
+		
 def setBitrate(idx):
 	print "setbitrate:%s" % idx
 
