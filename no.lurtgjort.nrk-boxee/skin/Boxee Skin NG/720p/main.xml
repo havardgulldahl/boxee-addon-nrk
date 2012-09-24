@@ -220,7 +220,8 @@ menuClicked(item)
 					<width>172</width>
 					<height>97</height>
 					<align>center</align>
-					<texture>$INFO[ListItem.Thumb]</texture>
+					<!-- texture>$INFO[ListItem.Thumb]</texture-->
+					<info>ListItem.Thumb</info>
 				</control>
 				
 				<control type="image">
@@ -353,7 +354,7 @@ genreClicked(item)
             <label>Your search didn't match any results.</label>
         </control>
 		
-		<!-- Programs -->
+		<!-- List of video items -->
 		
 		<control type="panel" id="130">
 		    <visible>false</visible>
@@ -384,7 +385,7 @@ genreClicked(item)
 					<width>172</width>
 					<height>97</height>
 					<align>center</align>
-					<texture>$INFO[ListItem.Thumb]</texture>
+					<info>ListItem.Thumb</info>
 				</control>
 			</itemlayout>
 			<focusedlayout width="190" height="150">

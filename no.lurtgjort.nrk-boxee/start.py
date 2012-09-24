@@ -10,6 +10,7 @@ import httplib
 import os.path
 import urlparse
 import datetime
+import re
 import hls
 import simplejson
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
@@ -49,16 +50,20 @@ def menuClicked(item):
 
 	if lbl == 'Direkte': # live
 		listLive()
-	elif lbl in ['Aktuelt', 'Program']:
-		progs = getShow(lbl)
-		listProgs(progs)
+	elif lbl in ['Aktuelt',]:
+		videoitems = getRecent()
+		listVideoItems(videoitems)
+	elif lbl in ['Program']:
+		listPrograms()
 	elif lbl in ['Favoritter', ]:
-		progs = getFavorites()
-		listProgs(progs)
+		videoitems = getFavorites()
+		listVideoItems(videoitems)
 	elif lbl == 'Sjanger':
 		listGenres()
 	elif lbl == 'Søk':
-		print "Search"
+		videoitems = search()
+		listVideoItems(videoitems)
+		
 	mc.HideDialogWait()
 	
 def listLive():
@@ -105,17 +110,17 @@ def listProgs(progs):
 	print "listprogs: %s" % progs
 	
 def listVideoItems(items):
-	print "listitems: %s" % items
-	
- 	mc.GetActiveWindow().GetList(130).SetItems(items)
+	# print "listitems: %s" % items
 
+	# add videos to videoitem panel
+ 	mc.GetActiveWindow().GetList(130).SetItems(items)
+	# hide other panels
 	mc.GetActiveWindow().GetList(120).SetVisible(False)
 	mc.GetActiveWindow().GetList(110).SetVisible(False)
+	# show videoitem panel
 	mc.GetActiveWindow().GetList(130).SetVisible(True)
 	mc.GetActiveWindow().GetList(130).SetFocus()	
 	
-
-
 def listGenres():
 	items = mc.ListItems()
 	for genre in getGenres():
@@ -139,15 +144,36 @@ def genreClicked(genre):
 	#http://tv.nrk.no/listobjects/recentlysentbycategory/barn.json/page/1
 	url = 'http://tv.nrk.no/listobjects/recentlysentbycategory/%s.json/page/0' % os.path.basename(genre.GetProperty('url'))
 	print url
-	# {"ListObjectViewModels":[{"Title":"Danseakademiet 26:27","ImageUrl":"http://gfx.nrk.no/djo0urdjx-AdYOjj1csrrgU66bPW3i_pzxxfXn9ym8yg","Url":"/serie/danseakademiet/msui33007510/sesong-2/episode-26","ViewCount":0,"Categories":[{"Url":"/kategori/barn","Id":"barn","DisplayValue":"Barn"}]}
-	jsondoc = GET(url)
+	items = listObjectsToItems(url, genre.GetLabel())
+	listVideoItems(items)
+	mc.HideDialogWait()
+
+def getRecent():
+	url = "http://tv.nrk.no/listobjects/recentlysent.json/page/0"
+	return listObjectsToItems(url)
+
+def doSearch():
+	q = mc.ShowDialogKeyboard('Søk i hele NRK', '', False)
+	if q:
+		mc.ShowDialogWait()
+		data = []#api.search(q, limit=40)
+		mc.HideDialogWait()
+	else:
+		data = []
+	return data
+	
+def listObjectsToItems(url, genre=None):
+	jsondoc = GET(url, Accept='application/json')
 	res = simplejson.loads(jsondoc.read().decode('utf-8'))
 	items = mc.ListItems()
+	# {"ListObjectViewModels":[{"Title":"Danseakademiet 26:27","ImageUrl":"http://gfx.nrk.no/djo0urdjx-AdYOjj1csrrgU66bPW3i_pzxxfXn9ym8yg","Url":"/serie/danseakademiet/msui33007510/sesong-2/episode-26","ViewCount":0,"Categories":[{"Url":"/kategori/barn","Id":"barn","DisplayValue":"Barn"}]}
 	for i in res['ListObjectViewModels']:
 		item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_EPISODE)
-		item.SetGenre(genre.GetLabel())
+		if genre is not None:
+			item.SetGenre(genre)
 		item.SetLabel(utf8(i['Title']))
 		item.SetTitle(utf8(i['Title']))
+		item.SetIcon(utf8(i['ImageUrl']))
 		item.SetThumbnail(utf8(i['ImageUrl']))
 		item.SetProperty('url', utf8(i['Url']))
 		item.SetProperty('viewCount', utf8(i['ViewCount']))
@@ -163,16 +189,19 @@ def genreClicked(genre):
 		if iteminfo.has_key('episode'): # TV series episode
 			item.SetSeason(iteminfo['episode'])
 		items.append(item)
-	listVideoItems(items)
-	mc.HideDialogWait()
+	return items
 
 def parsePath(path):
 	# break up paths to extract as much info as possible
 	# examples:
 	# /serie/moffene/obui12005409/22-09-2012
 	# /serie/danseakademiet/msui33007510/sesong-2/episode-26
+	# /program/koid23007309
 	
-	print "parsePath: %s" % path
+	def findVideoId(s):
+		return re.search(r'([a-zA-Z]{4}\d{8})', s).group(1)
+	
+	# print "parsePath: %s" % path
 	components = [p for p in path.split('/') if len(p) > 0]
 	ret = {}
 	if components[0] == 'serie':
@@ -185,17 +214,22 @@ def parsePath(path):
 		except ValueError:
 			# not a date at components[3], try to parse season and episode
 			try:
-				_info = "%s %s" % (components[4], components[5])
+				_info = "%s %s" % (components[3], components[4])
 				ret['season'], ret['episode'] = map(int, re.match(r'sesong-(\d+)\ episode-(\d+)', _info).groups())
 			except:
 				pass
+
+	elif components[0] == 'program':
+		ret['type'] = 'program'
+		ret['id'] = findVideoId(components[1])
 	else:
 		# fall back to id parsing
+		print "unknown path structure: %s" % path
 		try:
-			ret['id'] = re.search(r'([a-zA-Z]{4}+d{8})', path).group(1)
+			ret['id'] = findVideoId(path)
 		except:
-			raise
-	print "parsed: %s" % repr(ret)
+			pass
+	# print "parsed: %s" % repr(ret)
 	return ret
 	
 def GET(location, **kwargs):

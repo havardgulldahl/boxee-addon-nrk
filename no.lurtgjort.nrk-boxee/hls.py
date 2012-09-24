@@ -37,7 +37,7 @@ def LiveChannel(channelname, bitrate=2):
 	"Return a playable ListItem from one of the live channel streams"
 	item = HLSListItem(NRKLIVESTREAMS[channelname.upper()] % NRKBITRATES[bitrate], title=channelname)
 	item.SetProviderSource('Norsk Rikskringkasting')
-	item.SetIcon("%s-active.png" % channelname.lower())
+	item.SetIcon("%s.png" % channelname.lower())
 	item.SetDescription("%s, live channel by Norwegian Broadcasting" % channelname, True)
 	return item
 
@@ -46,7 +46,6 @@ def HLSListItem(url, **kwargs):
     quality = kwargs.get('quality', 'A') #set playlist stream bandwith, 0, 1, A (low, high, adaptive)
     title = kwargs.get('title', 'My funky HLSListItem')
     playlist_url = "playlist://%s?%s" % (quote_plus(url), urlencode({'quality':quality}))
-    #mc.LogDebug(playlist_url)
     item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_CLIP)
     item.SetPath(playlist_url)
     item.SetLabel(title)
@@ -67,3 +66,4 @@ def NRKHLSItemList():
 			raise
     mc.LogDebug("returning hls list: %s" % mylist)
     return mylist
+	
