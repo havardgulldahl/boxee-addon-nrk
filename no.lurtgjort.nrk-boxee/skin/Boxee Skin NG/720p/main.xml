@@ -186,16 +186,23 @@ menuClicked(item)
 			<textcolor>white</textcolor>
 		</control>
 		<control type="label">
-			<posx>830</posx>
+			<posx>865</posx>
 			<posy>440</posy>
 			<width>340</width>
 			<height>300</height>
 			<visible>Control.IsVisible(130)</visible>
-			<font>font18</font>
+			<font>font20</font>
 			<align>left</align>
 			<aligny>top</aligny>
-			<info>Container(130).ListItem(0).Property(custom:thumbUrl)</info>
+			<label>$INFO[Container(130).ListItem(0).Date,Dato: ] 
+$INFO[Container(130).ListItem(0).TVShowTitle,TV-serie:,[CR]]$INFO[Container(130).ListItem(0).Season,Sesong: ]$INFO[Container(130).ListItem(0).Episode,$COMMA episode ]
+$INFO[Container(130).ListItem(0).property(custom:viewCount),Sett , ganger]
+$INFO[Container(130).ListItem(0).property(custom:url),Url: ]
+$INFO[Container(130).ListItem(0).property(custom:thumbUrl),ThumbUrl: ]
+$INFO[Container(130).ListItem(0).property(custom:id),ID: ]
+</label>
 			<textcolor>white</textcolor>
+			<multiline>true</multiline>
 		</control>
 		
 		<!-- Live channels -->

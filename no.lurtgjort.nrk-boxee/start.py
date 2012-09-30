@@ -168,28 +168,27 @@ def listObjectsToItems(url, genre=None):
 	items = mc.ListItems()
 	# {"ListObjectViewModels":[{"Title":"Danseakademiet 26:27","ImageUrl":"http://gfx.nrk.no/djo0urdjx-AdYOjj1csrrgU66bPW3i_pzxxfXn9ym8yg","Url":"/serie/danseakademiet/msui33007510/sesong-2/episode-26","ViewCount":0,"Categories":[{"Url":"/kategori/barn","Id":"barn","DisplayValue":"Barn"}]}
 	for i in res['ListObjectViewModels']:
-		item = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN)
+		item = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN) # MEDIA_UNKOWN is the only type where http thumbnails show up
 		if genre is not None:
 			item.SetGenre(genre)
 		item.SetLabel(utf8(i['Title']))
 		item.SetTitle(utf8(i['Title']))
 		item.SetThumbnail(utf8(i['ImageUrl']))
-		print repr(i['ImageUrl'])
-		print repr(utf8(i['ImageUrl']))
 		item.SetProperty('thumbUrl', utf8(i['ImageUrl']))
 		item.SetProperty('url', utf8(i['Url']))
 		item.SetProperty('viewCount', utf8(i['ViewCount']))
 		iteminfo = parsePath(utf8(i['Url']))
 		if iteminfo.has_key('id'): # this will get us our mediaURL later on
 			item.SetProperty('id', iteminfo['id'])
-		if iteminfo.has_key('showtitle'): # TV Show title
+		if iteminfo.has_key('xshowtitle'): # TV Show title
 			item.SetTVShowTitle(iteminfo['showtitle'])
 		if iteminfo.has_key('airdate'): # date first aired, datetime.date object
 			item.SetDate(iteminfo['airdate'].year, iteminfo['airdate'].month, iteminfo['airdate'].day)
-		if iteminfo.has_key('season'): # TV series season	
+		if iteminfo.has_key('xseason'): # TV series season	
 			item.SetSeason(iteminfo['season'])
-		if iteminfo.has_key('episode'): # TV series episode
-			item.SetSeason(iteminfo['episode'])
+			print "seriebilde", utf8(i['ImageUrl'])
+		if iteminfo.has_key('xepisode'): # TV series episode
+			item.SetEpisode(iteminfo['episode'])
 		items.append(item)
 	return items
 
