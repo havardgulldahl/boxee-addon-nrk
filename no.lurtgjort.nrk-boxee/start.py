@@ -46,7 +46,7 @@ def menuClicked(item):
 	
 	lbl = item.GetLabel()
 	
-	setLabel(99, lbl)
+	# setLabel(99, lbl) 	
 
 	if lbl == 'Direkte': # live
 		listLive()
@@ -139,7 +139,7 @@ def listGenres():
 
 def genreClicked(genre):
 	print "genre cliked: %s" % genre.GetLabel()
-	setLabel(99, genre.GetLabel())
+	# setLabel(99, genre.GetLabel())
 	mc.ShowDialogWait()
 	#http://tv.nrk.no/listobjects/recentlysentbycategory/barn.json/page/1
 	url = 'http://tv.nrk.no/listobjects/recentlysentbycategory/%s.json/page/0' % os.path.basename(genre.GetProperty('url'))
@@ -168,13 +168,15 @@ def listObjectsToItems(url, genre=None):
 	items = mc.ListItems()
 	# {"ListObjectViewModels":[{"Title":"Danseakademiet 26:27","ImageUrl":"http://gfx.nrk.no/djo0urdjx-AdYOjj1csrrgU66bPW3i_pzxxfXn9ym8yg","Url":"/serie/danseakademiet/msui33007510/sesong-2/episode-26","ViewCount":0,"Categories":[{"Url":"/kategori/barn","Id":"barn","DisplayValue":"Barn"}]}
 	for i in res['ListObjectViewModels']:
-		item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_EPISODE)
+		item = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN)
 		if genre is not None:
 			item.SetGenre(genre)
 		item.SetLabel(utf8(i['Title']))
 		item.SetTitle(utf8(i['Title']))
-		item.SetIcon(utf8(i['ImageUrl']))
 		item.SetThumbnail(utf8(i['ImageUrl']))
+		print repr(i['ImageUrl'])
+		print repr(utf8(i['ImageUrl']))
+		item.SetProperty('thumbUrl', utf8(i['ImageUrl']))
 		item.SetProperty('url', utf8(i['Url']))
 		item.SetProperty('viewCount', utf8(i['ViewCount']))
 		iteminfo = parsePath(utf8(i['Url']))

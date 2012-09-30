@@ -52,24 +52,12 @@ print "onload main.xml"
 
         <!-- head icon -->
          <control type="image">
-            <width>46</width>
-            <height>16</height>
-            <posx>30</posx>
+            <width>92</width>
+            <height>32</height>
+            <posx>20</posx>
             <posy>38</posy>
             <texture>nrktv.png</texture>
-         </control>
-        
-        <!-- head title -->
-
-        <control type="label" id="99">
-			<visible>true</visible>
-			<width>600</width>
-            <posx>170</posx>
-            <posy>25</posy>
-            <font>font23b</font>
-            <align>left</align>
-            <label>Choose your poison.</label>
-        </control>        
+         </control>      
         
         <!-- top line -->
         
@@ -83,18 +71,17 @@ print "onload main.xml"
 	  </control><!-- end top menu group -->
         
        <!-- navigation menu -->
-
 	   
 		<control type="list" id="100">
-			<posx>55</posx>
-			<posy>155</posy>
-			<width>500</width>
-			<height>500</height>
-			<orientation>vertical</orientation>
+			<posx>160</posx>
+			<posy>30</posy>
+			<width>1150</width>
+			<height>100</height>
+			<orientation>horizontal</orientation>
 			<onup>-</onup>
-			<ondown>-</ondown>
+			<onright>-</onright>
 			<onleft>-</onleft>
-			<onright lang="python">
+			<ondown lang="python">
 <![CDATA[
 if mc.GetActiveWindow().GetList(110).IsVisible():
 	mc.GetActiveWindow().GetList(110).SetFocus()
@@ -103,12 +90,12 @@ elif mc.GetActiveWindow().GetList(120).IsVisible():
 else:
 	mc.GetActiveWindow().GetList(130).SetFocus()
 ]]>
-			</onright>
-			<itemlayout width="500" height="60">
+			</ondown>
+			<itemlayout width="155" height="60">
 				<control type="label">
 					<posx>15</posx>
 					<posy>9</posy>
-					<width>500</width>
+					<width>150</width>
 					<height>44</height>
 					<font>font23b</font>
 					<align>left</align>
@@ -116,11 +103,11 @@ else:
 					<textcolor>FF9ECFDF</textcolor>
 				</control>
 			</itemlayout>
-			<focusedlayout width="500" height="60">
+			<focusedlayout width="155" height="60">
 				<control type="label">
 					<posx>15</posx>
 					<posy>9</posy>
-					<width>500</width>
+					<width>150</width>
 					<height>44</height>
 					<font>font23b</font>
 					<align>left</align>
@@ -131,7 +118,7 @@ else:
 	            <control type="image">
 		            <posx>0</posx>
 		            <posy>0</posy>
-		            <width>226</width>
+		            <width>150</width>
 		            <height>50</height>
 		            <align>center</align>
 				 	<texture>marked.png</texture>
@@ -141,7 +128,7 @@ else:
 				<control type="label">
 					<posx>15</posx>
 					<posy>9</posy>
-					<width>250</width>
+					<width>150</width>
 					<height>44</height>
 					<font>font23b</font>
 					<align>left</align>
@@ -164,22 +151,68 @@ menuClicked(item)
 				</onclick>
 			</content>
 		</control>
+
+		<!-- Preview pane  -->
+		
+		<control type="image">
+			<posx>850</posx>
+			<posy>150</posy>
+			<width>400</width>
+			<height>700</height>
+			<align>center</align>
+			<texture>black.png</texture>
+			<visible>Control.IsVisible(130)</visible>
+		</control>
+		<control type="image">
+			<posx>855</posx>
+			<posy>170</posy>
+			<width>390</width>
+			<height>200</height>
+			<align>center</align>
+			<info>Container(130).ListItem(0).Thumb</info>
+			<visible>Control.IsVisible(130)</visible>
+			<aspectratio>keep</aspectratio>
+		</control>
+		<control type="label">
+			<posx>865</posx>
+			<posy>390</posy>
+			<width>340</width>
+			<height>40</height>
+			<visible>Control.IsVisible(130)</visible>
+			<font>font20b</font>
+			<align>left</align>
+			<aligny>top</aligny>
+			<info>Container(130).ListItem(0).Label</info>
+			<textcolor>white</textcolor>
+		</control>
+		<control type="label">
+			<posx>830</posx>
+			<posy>440</posy>
+			<width>340</width>
+			<height>300</height>
+			<visible>Control.IsVisible(130)</visible>
+			<font>font18</font>
+			<align>left</align>
+			<aligny>top</aligny>
+			<info>Container(130).ListItem(0).Property(custom:thumbUrl)</info>
+			<textcolor>white</textcolor>
+		</control>
 		
 		<!-- Live channels -->
                 
 		<control type="panel" id="110">
-			<posx>350</posx>
+			<posx>100</posx>
 			<posy>125</posy>
-			<width>880</width>
+			<width>900</width>
 			<height>600</height>
 			<orientation>vertical</orientation>
 			<onright>-</onright>
-			<onup>-</onup>
+			<onleft>-</onleft>
 			<ondown>-</ondown>
-			<onleft lang="python">100</onleft>
-			<itemlayout width="250" height="270">
+			<onup>100</onup>
+			<itemlayout width="200" height="270">
 				<control type="label">
-					<posx>75</posx>
+					<posx>100</posx>
 					<posy>145</posy>
 					<width>200</width>
 					<height>25</height>
@@ -198,9 +231,9 @@ menuClicked(item)
 					<texture>$INFO[ListItem.Label].png</texture>
 				</control>
 			</itemlayout>
-			<focusedlayout width="176" height="270">
+			<focusedlayout width="200" height="270">
 				<control type="label">
-					<posx>75</posx>
+					<posx>100</posx>
 					<posy>145</posy>
 					<width>200</width>
 					<height>25</height>
@@ -236,9 +269,9 @@ menuClicked(item)
 				<control type="label">
 					<posx>7</posx>
 					<posy>195</posy>
-					<width>180</width>
+					<width>200</width>
 					<height>500</height>
-					<font>font19</font>
+					<font>font18</font>
 					<align>left</align>
 					<aligny>top</aligny>
 					<label>$INFO[ListItem.property(Description)]</label>
@@ -261,22 +294,23 @@ play(item)
 			</content>
 		</control>	
         
-		<!-- Genres -->
+		<!-- Text items -->
 		
 		<control type="panel" id="120">
 			<visible>false</visible>
-			<posx>350</posx>
+			<posx>155</posx>
 			<posy>155</posy>
-			<width>780</width>
-			<height>555</height>
+			<width>800</width>
+			<height>600</height>
 			<orientation>vertical</orientation>
-			<onleft>100</onleft>
-			<itemlayout width="260" height="50">
+			<onleft>-</onleft>
+			<onup>100</onup>
+			<itemlayout width="380" height="55">
 				<control type="label">
 					<posx>14</posx>
 					<posy>0</posy>
-					<width>260</width>
-					<height>52</height>
+					<width>360</width>
+					<height>50</height>
 					<font>font23b</font>
 					<align>left</align>
 					<aligny>center</aligny>
@@ -284,12 +318,12 @@ play(item)
 					<textcolor>white</textcolor>
 				</control>
 			</itemlayout>
-			<focusedlayout width="260" height="50">
+			<focusedlayout width="380" height="55">
 			 	<control type="image">
 		            <posx>0</posx>
 		            <posy>4</posy>
-		            <width>240</width>
-		            <height>44</height>
+		            <width>370</width>
+		            <height>50</height>
 		            <align>center</align>
 				 	<texture>marked.png</texture>
 				 	<visible>Control.HasFocus(120)</visible>
@@ -297,28 +331,13 @@ play(item)
 				<control type="label">
 					<posx>14</posx>
 					<posy>0</posy>
-					<width>260</width>
-					<height>52</height>
+					<width>360</width>
+					<height>50</height>
 					<font>font23b</font>
 					<align>left</align>
 					<aligny>center</aligny>
 					<label>$INFO[Listitem.Label]</label>
 					<textcolor>white</textcolor>
-				</control>
-				<control type="label">
-					<posx>14</posx>
-					<posy>0</posy>
-					<width>260</width>
-					<height>52</height>
-					<font>font23b</font>
-					<align>left</align>
-					<aligny>center</aligny>
-					<label>$INFO[Listitem.Label]</label>
-					<textcolor>white</textcolor>
-					<selectedcolor>white</selectedcolor>
-					<scroll>true</scroll>
-					<scrollspeed>30</scrollspeed>
-					<visible>Control.HasFocus(120)</visible>
 				</control>
 			</focusedlayout>
 			<content type="action">
@@ -326,7 +345,6 @@ play(item)
 <![CDATA[
 list = mc.GetActiveWindow().GetList(120)
 item = list.GetItem(list.GetFocusedItem())
-item.Dump()
 genreClicked(item)
 
 ]]>
@@ -358,15 +376,15 @@ genreClicked(item)
 		
 		<control type="panel" id="130">
 		    <visible>false</visible>
-			<posx>350</posx>
+			<posx>70</posx>
 			<posy>105</posy>
-			<width>900</width>
+			<width>800</width>
 			<height>600</height>
 			<orientation>vertical</orientation>
 			<onright>-</onright>
-			<onup>-</onup>
+			<onup>100</onup>
 			<ondown>-</ondown>
-			<onleft lang="python">100</onleft>
+			<onleft>-</onleft>
 			<itemlayout width="190" height="150">
 				<control type="label">
 					<posx>75</posx>
@@ -376,7 +394,7 @@ genreClicked(item)
 					<font>font18</font>
 					<align>center</align>
 					<aligny>center</aligny>
-					<label>$INFO[ListItem.Title]</label>
+					<info>ListItem.Label</info>
 					<textcolor>white</textcolor>
 				</control>
 				<control type="image">
@@ -397,7 +415,7 @@ genreClicked(item)
 					<font>font18b</font>
 					<align>center</align>
 					<aligny>center</aligny>
-					<label>$INFO[ListItem.Title]</label>
+					<info>ListItem.Label</info>
 					<textcolor>white</textcolor>
 					<selectedcolor>DD171717</selectedcolor>
 					<scroll>true</scroll>
@@ -410,7 +428,7 @@ genreClicked(item)
 					<width>172</width>
 					<height>97</height>
 					<align>center</align>
-					<texture>$INFO[ListItem.Thumb]</texture>
+					<info>ListItem.Thumb</info>
 				</control>
 
 				<control type="image">
@@ -428,7 +446,6 @@ genreClicked(item)
 <![CDATA[
 list = mc.GetActiveWindow().GetList(130)
 item = list.GetItem(list.GetFocusedItem())
-item.Dump()
 play(item)
 ]]>
 				</onclick>
