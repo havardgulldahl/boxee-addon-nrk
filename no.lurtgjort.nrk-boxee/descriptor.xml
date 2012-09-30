@@ -7,7 +7,7 @@ Released under a GPL3 license, see LICENSE.txt
   <id>no.lurtgjort.nrk-boxee</id>
   <name>NRK -- Norwegian Broadcasting</name>
   <version>0.2</version>
-  <description>Enjoy a diverse selection of national and international programming from the Norwegian Public Broadcaster, NRK</description>
+  <description>Enjoy a diverse selection of national and international programming from the Norwegian Public Broadcaster, NRK. This app plays both live and video on demand streams.</description>
   <thumb>http://apps.lurtgjort.no/thumbs/NRK.png</thumb>
   <repository>http://apps.lurtgjort.no/boxee</repository>
   <media>video</media>
