@@ -152,58 +152,7 @@ menuClicked(item)
 			</content>
 		</control>
 
-		<!-- Preview pane  -->
 		
-		<control type="image">
-			<posx>850</posx>
-			<posy>150</posy>
-			<width>400</width>
-			<height>700</height>
-			<align>center</align>
-			<texture>black.png</texture>
-			<visible>Control.IsVisible(130)</visible>
-		</control>
-		<control type="image">
-			<posx>855</posx>
-			<posy>170</posy>
-			<width>390</width>
-			<height>200</height>
-			<align>center</align>
-			<info>Container(130).ListItem(0).Thumb</info>
-			<visible>Control.IsVisible(130)</visible>
-			<aspectratio>keep</aspectratio>
-		</control>
-		<control type="label">
-			<posx>865</posx>
-			<posy>390</posy>
-			<width>340</width>
-			<height>40</height>
-			<visible>Control.IsVisible(130)</visible>
-			<font>font20b</font>
-			<align>left</align>
-			<aligny>top</aligny>
-			<info>Container(130).ListItem(0).Label</info>
-			<textcolor>white</textcolor>
-		</control>
-		<control type="label">
-			<posx>865</posx>
-			<posy>440</posy>
-			<width>340</width>
-			<height>300</height>
-			<visible>Control.IsVisible(130)</visible>
-			<font>font20</font>
-			<align>left</align>
-			<aligny>top</aligny>
-			<label>$INFO[Container(130).ListItem(0).Date,Dato: ] 
-$INFO[Container(130).ListItem(0).TVShowTitle,TV-serie:,[CR]]$INFO[Container(130).ListItem(0).Season,Sesong: ]$INFO[Container(130).ListItem(0).Episode,$COMMA episode ]
-$INFO[Container(130).ListItem(0).property(custom:viewCount),Sett , ganger]
-$INFO[Container(130).ListItem(0).property(custom:url),Url: ]
-$INFO[Container(130).ListItem(0).property(custom:thumbUrl),ThumbUrl: ]
-$INFO[Container(130).ListItem(0).property(custom:id),ID: ]
-</label>
-			<textcolor>white</textcolor>
-			<multiline>true</multiline>
-		</control>
 		
 		<!-- Live channels -->
                 
@@ -388,7 +337,7 @@ genreClicked(item)
 			<width>800</width>
 			<height>600</height>
 			<orientation>vertical</orientation>
-			<onright>-</onright>
+			<onright>135</onright>
 			<onup>100</onup>
 			<ondown>-</ondown>
 			<onleft>-</onleft>
@@ -459,5 +408,94 @@ play(item)
 			</content>
 		</control>	
 
+		<!-- Preview pane  -->
+		
+		<control type="image">
+			<posx>850</posx>
+			<posy>150</posy>
+			<width>400</width>
+			<height>700</height>
+			<align>center</align>
+			<texture>black.png</texture>
+			<visible>Control.IsVisible(130)</visible>
+		</control>
+		<control type="image">
+			<posx>855</posx>
+			<posy>170</posy>
+			<width>390</width>
+			<height>200</height>
+			<align>center</align>
+			<info>Container(130).ListItem(0).Thumb</info>
+			<visible>Control.IsVisible(130)</visible>
+			<aspectratio>keep</aspectratio>
+		</control>
+		<control type="label">
+			<posx>865</posx>
+			<posy>390</posy>
+			<width>340</width>
+			<height>40</height>
+			<visible>Control.IsVisible(130)</visible>
+			<font>font26b</font>
+			<align>left</align>
+			<aligny>top</aligny>
+			<info>Container(130).ListItem(0).Label</info>
+			<textcolor>white</textcolor>
+		</control>
+		<control type="label">
+			<posx>865</posx>
+			<posy>440</posy>
+			<width>340</width>
+			<height>300</height>
+			<visible>Control.IsVisible(130)</visible>
+			<font>font20</font>
+			<align>left</align>
+			<aligny>top</aligny>
+			<label>$INFO[Container(130).ListItem(0).Date,Dato: ] 
+$INFO[Container(130).ListItem(0).TVShowTitle,TV-serie:,[CR]]$INFO[Container(130).ListItem(0).Season,Sesong: ]$INFO[Container(130).ListItem(0).Episode,$COMMA episode ]
+$INFO[Container(130).ListItem(0).property(custom:viewCount),Sett , ganger]
+$INFO[Container(130).ListItem(0).property(custom:url),Url: ]
+$INFO[Container(130).ListItem(0).property(custom:id),ID: ]
+</label>
+			<textcolor>white</textcolor>
+			<multiline>true</multiline>
+		</control>
+		<control type="grouplist" id="135">
+			 <posx>880</posx>
+			 <posy>600</posy>
+			 <width>340</width>
+			 <height>120</height>
+			 <orientation>vertical</orientation>
+			 <visible>Control.IsVisible(130)</visible>
+			 <itemgap>10</itemgap>
+			 <onup>100</onup>
+			 <ondown>-</ondown>
+			 <onleft>130</onleft>
+			 <onright>-</onright>
+			 <control type="button" id="1351">
+			   <label>Merk som favoritt</label>
+			   <width>300</width>
+			   <height>20</height>
+			   <font>font18</font>
+			   <align>center</align>
+			 </control>
+			 <control type="button" id="1352">
+			   <label>Legg i ko</label>
+			   <width>300</width>
+			   <height>20</height>
+			   <font>font18</font>
+			   <align>center</align>
+			 </control>
+			 <control type="button" id="1353">
+			   <label>Finn resten av serien</label>
+			   <width>300</width>
+			   <height>20</height>
+			   <font>font18</font>
+			   <align>center</align>
+			 </control>
+		</control>
+		 
+		<!-- End preview pane  -->
+		
+		
    </controls>
 </window> 

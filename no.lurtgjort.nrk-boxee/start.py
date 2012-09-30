@@ -9,6 +9,7 @@ import mc
 import httplib
 import os.path
 import urlparse
+import urllib
 import datetime
 import re
 import hls
@@ -61,7 +62,7 @@ def menuClicked(item):
 	elif lbl == 'Sjanger':
 		listGenres()
 	elif lbl == 'Søk':
-		videoitems = search()
+		videoitems = doSearch()
 		listVideoItems(videoitems)
 		
 	mc.HideDialogWait()
@@ -156,7 +157,7 @@ def doSearch():
 	q = mc.ShowDialogKeyboard('Søk i hele NRK', '', False)
 	if q:
 		mc.ShowDialogWait()
-		data = []#api.search(q, limit=40)
+		data = getSearch(q)
 		mc.HideDialogWait()
 	else:
 		data = []
@@ -268,6 +269,16 @@ def getGenres():
 		ret.append( { 'title': utf8(el.string), 'url': utf8(el['href']) } )
 	return ret	
 
+def getSearch(term):
+	#http://tv.nrk.no/sok?q=hedda+gabler&filter=rettigheter	
+	res = GET("http://tv.nrk.no/sok?q=%s&filter=rettigheter" % urllib.quote_plus(term))
+	html = BeautifulSoup(res.read().decode("utf-8"), convertEntities=BeautifulStoneSoup.ALL_ENTITIES)
+	hits = []
+	for videoclip in html.find(id='searchResult').findall('a', {'class': 'listobject-link'}):
+		hits.append(videoclip)
+	print "videoclip", hits
+	return hits
+	
 def play(item):
 	confirm = mc.ShowDialogConfirm('NRK', 'Would you like to play "%s"?' % item.GetLabel(), 'Cancel', 'Play')
 	if confirm:
