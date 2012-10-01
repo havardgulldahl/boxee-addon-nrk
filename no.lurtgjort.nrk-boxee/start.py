@@ -16,8 +16,11 @@ import hls
 import simplejson
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
 
-def utf8(str):
-	return unicode(str).encode('utf-8')
+def utf8(s):
+	if isinstance(s, str): 
+		return s
+	else: 
+		return unicode(s).encode('utf-8')
 
 def setLabel(id, str):
 	return mc.GetActiveWindow().GetLabel(id).SetLabel(unicode(str).encode('utf-8'))
@@ -153,15 +156,54 @@ def getRecent():
 	url = "http://tv.nrk.no/listobjects/recentlysent.json/page/0"
 	return listObjectsToItems(url)
 
+def structToItem(i):
+	item = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN) # MEDIA_UNKOWN is the only type where http thumbnails show up
+	print repr(i['Title'])
+	item.SetLabel(utf8(i['Title']))
+	item.SetTitle(utf8(i['Title']))
+	item.SetThumbnail(utf8(i['ImageUrl']))
+	item.SetProperty('thumbUrl', utf8(i['ImageUrl']))
+	item.SetProperty('url', utf8(i['Url']))
+	if i.has_key('Description'):
+		item.SetDescription(utf8(i['Description']))
+	if i.has_key('Genres') and len(i['Genres'])>0:
+		item.SetProperty('genres', utf8(','.join(i['Genres'])))
+		item.SetGenre(utf8(i['Genres'][0]))
+	if i.has_key('ViewCount'):
+		item.SetProperty('viewCount', utf8(i['ViewCount']))
+	iteminfo = parsePath(utf8(i['Url']))
+	if iteminfo.has_key('id'): # this will get us our mediaURL later on
+		item.SetProperty('id', iteminfo['id'])
+	if iteminfo.has_key('showtitle'): # TV Show title
+		item.SetProperty('showtitle', iteminfo['showtitle'])
+	if iteminfo.has_key('airdate'): # date first aired, datetime.date object
+		item.SetDate(iteminfo['airdate'].year, iteminfo['airdate'].month, iteminfo['airdate'].day)
+	if iteminfo.has_key('season'): # TV series season	
+		item.SetProperty('season', str(iteminfo['season']))
+	if iteminfo.has_key('episode'): # TV series episode
+		item.SetProperty('episode', str(iteminfo['episode']))
+	return item
+	
 def doSearch():
+	items = mc.ListItems()
+	itemsperrow = 4
 	q = mc.ShowDialogKeyboard('Søk i hele NRK', '', False)
 	if q:
 		mc.ShowDialogWait()
-		data = getSearch(q)
+		search = getSearch(q)
+		i = 0
+		for itm in search['direct']:
+			items.append(structToItem(itm))
+			i = i + 1
+		for y in range(itemsperrow - i % itemsperrow): # fill remaining items in this row with blanks
+			itm = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN)
+			itm.SetLabel('blank')
+			itm.SetThumbnail('black.png')
+			items.append(itm)
+		for itm in search['reference']:
+			items.append(structToItem(itm))
 		mc.HideDialogWait()
-	else:
-		data = []
-	return data
+	return items
 	
 def listObjectsToItems(url, genre=None):
 	jsondoc = GET(url, Accept='application/json')
@@ -169,27 +211,9 @@ def listObjectsToItems(url, genre=None):
 	items = mc.ListItems()
 	# {"ListObjectViewModels":[{"Title":"Danseakademiet 26:27","ImageUrl":"http://gfx.nrk.no/djo0urdjx-AdYOjj1csrrgU66bPW3i_pzxxfXn9ym8yg","Url":"/serie/danseakademiet/msui33007510/sesong-2/episode-26","ViewCount":0,"Categories":[{"Url":"/kategori/barn","Id":"barn","DisplayValue":"Barn"}]}
 	for i in res['ListObjectViewModels']:
-		item = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN) # MEDIA_UNKOWN is the only type where http thumbnails show up
+		item = structToItem(i)
 		if genre is not None:
 			item.SetGenre(genre)
-		item.SetLabel(utf8(i['Title']))
-		item.SetTitle(utf8(i['Title']))
-		item.SetThumbnail(utf8(i['ImageUrl']))
-		item.SetProperty('thumbUrl', utf8(i['ImageUrl']))
-		item.SetProperty('url', utf8(i['Url']))
-		item.SetProperty('viewCount', utf8(i['ViewCount']))
-		iteminfo = parsePath(utf8(i['Url']))
-		if iteminfo.has_key('id'): # this will get us our mediaURL later on
-			item.SetProperty('id', iteminfo['id'])
-		if iteminfo.has_key('xshowtitle'): # TV Show title
-			item.SetTVShowTitle(iteminfo['showtitle'])
-		if iteminfo.has_key('airdate'): # date first aired, datetime.date object
-			item.SetDate(iteminfo['airdate'].year, iteminfo['airdate'].month, iteminfo['airdate'].day)
-		if iteminfo.has_key('xseason'): # TV series season	
-			item.SetSeason(iteminfo['season'])
-			print "seriebilde", utf8(i['ImageUrl'])
-		if iteminfo.has_key('xepisode'): # TV series episode
-			item.SetEpisode(iteminfo['episode'])
 		items.append(item)
 	return items
 
@@ -240,7 +264,7 @@ def GET(location, **kwargs):
 	config = {'User-Agent': 'Curl 7.21.1'}
 	config.update(kwargs)
 	print config
-	conn.request("GET", parsed[2], headers=config)
+	conn.request("GET", '%s?%s' % (parsed[2], parsed[4]), headers=config)
 	res = conn.getresponse()
 	print res.status, res.reason
 	return res
@@ -271,12 +295,39 @@ def getGenres():
 
 def getSearch(term):
 	#http://tv.nrk.no/sok?q=hedda+gabler&filter=rettigheter	
+	print "searching for term: %s" % term
 	res = GET("http://tv.nrk.no/sok?q=%s&filter=rettigheter" % urllib.quote_plus(term))
 	html = BeautifulSoup(res.read().decode("utf-8"), convertEntities=BeautifulStoneSoup.ALL_ENTITIES)
-	hits = []
-	for videoclip in html.find(id='searchResult').findall('a', {'class': 'listobject-link'}):
-		hits.append(videoclip)
-	print "videoclip", hits
+	def classre(cl):
+		"Helper function to search throuch class attribute contents for single class match"
+		return {'class': re.compile(r'\b%s\b' % cl)}
+		
+	def parselistobject(li):
+		"Helper to parse listobject html to something that might pass as listobject json"
+		# print "parselistobject: %s %s" % (type(li), li)
+		ret = {}
+		ret['Url'] = li.find('a', classre('listobject-link'))['href']
+		ret['ImageUrl'] = li.find('a', classre('listobject-link')).find('img')['src']
+		ret['Title'] = li.find('a', classre('listobject-link')).find('span', classre('listobject-title')).renderContents()
+		ret['Description'] = li.find('p').renderContents().decode('utf-8').replace('<b>', '[B]').replace('</b>', '[/B]').replace('<br>', '[CR]')
+		try:
+			ret['Genres'] = [os.path.basename(a['href']) for a in li.find('div', classre('stack-links')).findAll('a') if a['href'].startswith('http://tv.nrk.no/kategori')]
+		except:
+			pass
+		return ret
+
+	resultsblock = html.find(id='searchResult')
+	hits = {'direct':[], 'reference':[]}
+	try:
+		# first line hits (title match)
+		hits['direct'] = [parselistobject(li) for li in resultsblock.find('ul', classre('prepend-top')).findAll('li', classre('listobject'))]
+	except:
+		pass
+	try:
+		# general hits (description match)
+		hits['reference'] = [parselistobject(li) for li in resultsblock.find('ul', classre('programList')).findAll('li', classre('listobject'))]
+	except:
+		pass
 	return hits
 	
 def play(item):
