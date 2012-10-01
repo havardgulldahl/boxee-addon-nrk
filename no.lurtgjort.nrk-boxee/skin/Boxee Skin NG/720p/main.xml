@@ -442,7 +442,7 @@ play(item)
 			<textcolor>white</textcolor>
 		</control>
 		<control type="label">
-			<posx>865</posx>
+			<posx>860</posx>
 			<posy>440</posy>
 			<width>340</width>
 			<height>300</height>
@@ -451,7 +451,8 @@ play(item)
 			<align>left</align>
 			<aligny>top</aligny>
 			<label>$INFO[Container(130).ListItem(0).Date,Dato: ] 
-$INFO[Container(130).ListItem(0).TVShowTitle,TV-serie:,[CR]]$INFO[Container(130).ListItem(0).Season,Sesong: ]$INFO[Container(130).ListItem(0).Episode,$COMMA episode ]
+$INFO[Container(130).ListItem(0).property(custom:season),Sesong: ]$INFO[Container(130).ListItem(0).property(custom:episode),$COMMA episode ]
+$INFO[Container(130).ListItem(0).Description]
 $INFO[Container(130).ListItem(0).property(custom:viewCount),Sett , ganger]
 $INFO[Container(130).ListItem(0).property(custom:url),Url: ]
 $INFO[Container(130).ListItem(0).property(custom:id),ID: ]

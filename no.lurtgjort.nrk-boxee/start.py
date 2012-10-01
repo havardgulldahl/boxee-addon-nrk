@@ -158,7 +158,7 @@ def getRecent():
 
 def structToItem(i):
 	item = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN) # MEDIA_UNKOWN is the only type where http thumbnails show up
-	print repr(i['Title'])
+	print repr(i['Url'])
 	item.SetLabel(utf8(i['Title']))
 	item.SetTitle(utf8(i['Title']))
 	item.SetThumbnail(utf8(i['ImageUrl']))
@@ -197,8 +197,8 @@ def doSearch():
 			i = i + 1
 		for y in range(itemsperrow - i % itemsperrow): # fill remaining items in this row with blanks
 			itm = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN)
-			itm.SetLabel('blank')
-			itm.SetThumbnail('black.png')
+			itm.SetLabel('')
+			itm.SetThumbnail('')
 			items.append(itm)
 		for itm in search['reference']:
 			items.append(structToItem(itm))
@@ -217,22 +217,27 @@ def listObjectsToItems(url, genre=None):
 		items.append(item)
 	return items
 
-def parsePath(path):
+def parsePath(url):
 	# break up paths to extract as much info as possible
 	# examples:
 	# /serie/moffene/obui12005409/22-09-2012
 	# /serie/danseakademiet/msui33007510/sesong-2/episode-26
 	# /program/koid23007309
+	# http://tv.nrk.no/serie/superkviss/msub17001412/09-05-2012#sok=dyrevenn
+	# http://tv.nrk.no/serie/dyrevenn#sok=dyrevenn
 	
 	def findVideoId(s):
 		return re.search(r'([a-zA-Z]{4}\d{8})', s).group(1)
 	
-	# print "parsePath: %s" % path
+	path = urlparse.urlparse(url)[2]
+	print "parsePath: %s" % repr(path)
 	components = [p for p in path.split('/') if len(p) > 0]
 	ret = {}
 	if components[0] == 'serie':
 		ret['type'] = 'series'
 		ret['showtitle'] = components[1]
+		if len(components) == 2:
+			return ret
 		ret['id'] = components[2]
 		try:
 			d, m, y = [int(p, 10) for p in components[3].split('-')] # split date
@@ -263,9 +268,12 @@ def GET(location, **kwargs):
 	conn = httplib.HTTPConnection(parsed[1])
 	config = {'User-Agent': 'Curl 7.21.1'}
 	config.update(kwargs)
-	print config
-	conn.request("GET", '%s?%s' % (parsed[2], parsed[4]), headers=config)
-	res = conn.getresponse()
+	try:
+		conn.request("GET", '%s?%s' % (parsed[2], parsed[4]), headers=config)
+		res = conn.getresponse()
+	except Exception, (e):
+		mc.ShowDialogNotification('Problems connecting to the internet. Please check.')
+		return None
 	print res.status, res.reason
 	return res
 
@@ -308,12 +316,18 @@ def getSearch(term):
 		ret = {}
 		ret['Url'] = li.find('a', classre('listobject-link'))['href']
 		ret['ImageUrl'] = li.find('a', classre('listobject-link')).find('img')['src']
-		ret['Title'] = li.find('a', classre('listobject-link')).find('span', classre('listobject-title')).renderContents()
-		ret['Description'] = li.find('p').renderContents().decode('utf-8').replace('<b>', '[B]').replace('</b>', '[/B]').replace('<br>', '[CR]')
+		ret['Title'] = li.find('a', classre('listobject-link')).find('span', classre('listobject-title')).strong.string
+		ret['Description'] = li.find('p').renderContents().replace('<b>', '[B]').replace('</b>', '[/B]').replace('<br>', '[CR]')
 		try:
 			ret['Genres'] = [os.path.basename(a['href']) for a in li.find('div', classre('stack-links')).findAll('a') if a['href'].startswith('http://tv.nrk.no/kategori')]
 		except:
 			pass
+		try:
+			ret['EpisodeUrls'] = [a['href'] for a in li.find('ul', classre('episode-links')).findAll('a')]
+			if len(ret['EpisodeUrls']) > 0:
+				ret['Url'] = ret['EpisodeUrls'][0] # replace with first episode link, since it's always explicitly pointing to an episode
+		except Exception, (e):
+			print str(e)
 		return ret
 
 	resultsblock = html.find(id='searchResult')
@@ -340,8 +354,8 @@ def play(item):
 			mc.HideDialogWait()
 		mc.GetPlayer().Play(item)
 
-def getPathForId(videoid, bitrate=4):
-	if bitrate > 4: bitrate = 4
+def getPathForId(videoid, bitrate=3):
+	if bitrate > 4: bitrate = 3
 	url = "http://nrk.no/serum/api/video/%s" % videoid
 	print "getting path for id: %s" % url
 	json = simplejson.loads(GET(url, Accept='application/json').read().decode('utf-8'))
