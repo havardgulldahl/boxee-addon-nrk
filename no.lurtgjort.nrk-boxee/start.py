@@ -16,6 +16,21 @@ import hls
 import simplejson
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
 
+# use constants with a value that match the localized strings in boxee
+# http://developer.boxee.tv/Localization
+LABEL_LIVE = 54075
+LABEL_RECENT = 54063
+LABEL_GENRES = 135
+LABEL_PROGRAMS = 350
+LABEL_FAVORITES = 52111
+LABEL_PLAYLIST = 559
+LABEL_SEARCH = 137
+
+config = mc.GetApp().GetLocalConfig() # set up persistant store for playlist and favorites
+
+# some defaults
+MAX_SAVED_LIST_LENGTH = 10
+
 def utf8(s):
 	if isinstance(s, str): 
 		return s
@@ -23,7 +38,7 @@ def utf8(s):
 		return unicode(s).encode('utf-8')
 
 def setLabel(id, str):
-	return mc.GetActiveWindow().GetLabel(id).SetLabel(unicode(str).encode('utf-8'))
+	return mc.GetActiveWindow().GetLabel(id).SetLabel(utf8(str))
 
 def main():
 	mc.ActivateWindow(14000)
@@ -31,14 +46,15 @@ def main():
 	
 	# initialise menu
 	initMenu()
-	mc.HideDialogWait()
+	mc.HideDialogWait() # remove spinner
 
 def initMenu():
-	menu = ['Direkte', 'Aktuelt', 'Sjanger', 'Program', 'Favoritter', 'Søk', ]
+	menu = [LABEL_LIVE, LABEL_RECENT, LABEL_GENRES, LABEL_PROGRAMS, LABEL_FAVORITES, LABEL_PLAYLIST, LABEL_SEARCH]
 	items = mc.ListItems()
-	for p in menu:
+	for _id in menu:
 		item = mc.ListItem(mc.ListItem.MEDIA_VIDEO_CLIP)
-		item.SetLabel(p)
+		item.SetLabel(mc.GetLocalizedString(_id)) # this'll give us a localized menu for free
+		item.SetProperty("id", str(_id)) # keep the constant for later
 		items.append(item)
 		
 	mc.GetActiveWindow().GetList(100).SetItems(items)
@@ -47,27 +63,32 @@ def menuClicked(item):
 	mc.ShowDialogWait()
 	mc.GetActiveWindow().GetLabel(1110).SetVisible(False)
 	mc.GetActiveWindow().GetLabel(1120).SetVisible(False)
+	mc.GetActiveWindow().GetLabel(1130).SetVisible(False)
 	
-	lbl = item.GetLabel()
+	lbl = int(item.GetProperty("id"), 10) # get the menu item constant -- see initMenu()
+	# print "menulabel clicked : %s" % lbl
 	
-	# setLabel(99, lbl) 	
-
-	if lbl == 'Direkte': # live
+	if lbl == LABEL_LIVE: # live
 		listLive()
-	elif lbl in ['Aktuelt',]:
+	elif lbl in [LABEL_RECENT,]:
 		videoitems = getRecent()
 		listVideoItems(videoitems)
-	elif lbl in ['Program']:
+	elif lbl in [LABEL_PROGRAMS,]:
 		listPrograms()
-	elif lbl in ['Favoritter', ]:
-		videoitems = getFavorites()
-		listVideoItems(videoitems)
-	elif lbl == 'Sjanger':
+	elif lbl in [LABEL_FAVORITES,LABEL_PLAYLIST]:
+		videoitems = getSavedList(lbl)
+		if len(videoitems) > 0:
+			listVideoItems(videoitems)
+		else:
+			mc.GetActiveWindow().GetLabel(1120).SetVisible(True)
+	elif lbl == LABEL_GENRES:
 		listGenres()
-	elif lbl == 'Søk':
+	elif lbl == LABEL_SEARCH:
 		videoitems = doSearch()
-		listVideoItems(videoitems)
-		
+		if len(videoitems) > 0:
+			listVideoItems(videoitems)
+		else:
+			mc.GetActiveWindow().GetLabel(1130).SetVisible(True)
 	mc.HideDialogWait()
 	
 def listLive():
@@ -110,8 +131,11 @@ def listLive():
 	mc.GetActiveWindow().GetList(110).SetVisible(True)
 	mc.GetActiveWindow().GetList(110).SetFocus()	
 	
-def listProgs(progs):
-	print "listprogs: %s" % progs
+def listPrograms(genre=None,letter=None):
+	print "listprogs: genre %s -- letter %s" % (genre, letter)
+	items = mc.ListItems()
+	
+	return items
 	
 def listVideoItems(items):
 	# print "listitems: %s" % items
@@ -141,13 +165,48 @@ def listGenres():
 	mc.GetActiveWindow().GetList(120).SetVisible(True)
 	mc.GetActiveWindow().GetList(120).SetFocus()
 
+def getSavedList(kind):
+	items = mc.ListItems()
+	if kind == LABEL_PLAYLIST: # get current playlist
+		jsonlist = config.GetValue("playlist")
+	elif kind == LABEL_FAVORITES: # get favorited items or shows
+		jsonlist = config.GetValue("favorites")
+	print "got json list from storage: %s" % repr(jsonlist)
+	try:
+		simpleitems = simplejson.loads(jsonlist)
+	except ValueError: # empty list
+		return mc.ListItems()
+	for i in simpleitems:
+		items.append(structToItem(i))
+	return items
+		
+def addToSavedList(item, listname):
+	print "addTo saved list: %s path:%s listname:%s" % (item, item.GetPath(), listname)
+	newpath = item.GetPath()
+	if not newpath:
+		newpath = getPathForId(item.GetProperty("id")) 
+	new = {'Url': newpath, 'Title':item.GetTitle(), 'ImageUrl': item.GetProperty('ThumbUrl')}
+	try:
+		simpleitems = simplejson.loads(config.GetValue(listname)) # get previous items, decode it as a json list
+	except ValueError: # no list saved before
+		simpleitems = []
+	if len(simpleitems) > MAX_SAVED_LIST_LENGTH:
+		if mc.ShowDialogConfirm('NRK', 'Your list is full. Would you like to replace the first item?', 'Cancel', 'Yes'):
+			simpleitems = simpleitems[1:]
+		else:
+			return False
+	simpleitems.append(new)
+	print "adding item to list %s" % simpleitems
+	config.SetValue(simplejson.dumps(simpleitems), listname)
+	return True
+		
+		
 def genreClicked(genre):
-	print "genre cliked: %s" % genre.GetLabel()
-	# setLabel(99, genre.GetLabel())
+	# print "genre cliked: %s" % genre.GetLabel()
 	mc.ShowDialogWait()
 	#http://tv.nrk.no/listobjects/recentlysentbycategory/barn.json/page/1
 	url = 'http://tv.nrk.no/listobjects/recentlysentbycategory/%s.json/page/0' % os.path.basename(genre.GetProperty('url'))
-	print url
+	# print url
 	items = listObjectsToItems(url, genre.GetLabel())
 	listVideoItems(items)
 	mc.HideDialogWait()
@@ -195,11 +254,12 @@ def doSearch():
 		for itm in search['direct']:
 			items.append(structToItem(itm))
 			i = i + 1
-		for y in range(itemsperrow - i % itemsperrow): # fill remaining items in this row with blanks
-			itm = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN)
-			itm.SetLabel('')
-			itm.SetThumbnail('')
-			items.append(itm)
+		if i > 0: # only if we've started filling items
+			for y in range(itemsperrow - i % itemsperrow): # fill remaining items in this row with blanks
+				itm = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN)
+				itm.SetLabel('')
+				itm.SetThumbnail('')
+				items.append(itm)
 		for itm in search['reference']:
 			items.append(structToItem(itm))
 		mc.HideDialogWait()
@@ -354,12 +414,16 @@ def play(item):
 			mc.HideDialogWait()
 		mc.GetPlayer().Play(item)
 
-def getPathForId(videoid, bitrate=3):
-	if bitrate > 4: bitrate = 3
+def getMetadataForId(videoid):		
 	url = "http://nrk.no/serum/api/video/%s" % videoid
 	print "getting path for id: %s" % url
 	json = simplejson.loads(GET(url, Accept='application/json').read().decode('utf-8'))
 	print json
+	return json
+		
+def getPathForId(videoid, bitrate=3):
+	if bitrate > 4: bitrate = 3
+	json = getMetadataForId(videoid)
 	url = utf8(json['mediaURL'])
 	print repr(url)
 	url = url.replace('/z/', '/i/', 1)
@@ -374,4 +438,4 @@ def formatEpg(seq):
 	return ("\n".join( ["%s\n>> %s" % (e["PlannedStartTimeShortString"], e["Title"]) for e in seq] ).encode('utf-8'))
 
 	
-main() # run init
+main() # run it

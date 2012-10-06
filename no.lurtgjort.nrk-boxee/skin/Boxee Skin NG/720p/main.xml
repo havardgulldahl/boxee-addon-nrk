@@ -315,17 +315,27 @@ genreClicked(item)
             <posy>160</posy>
             <font>font23b</font>
             <align>left</align>
-            <label>You don't have any active rentals at the moment.</label>
+            <label>You haven't marked any favorites yet. Go ahead and heart some shows!.</label>
         </control>
         
-        <control type="label" id="1120">
+		<control type="label" id="1120">
 			<visible>false</visible>
 			<width>600</width>
             <posx>350</posx>
             <posy>160</posy>
             <font>font23b</font>
             <align>left</align>
-            <label>Your search didn't match any results.</label>
+            <label>Your playlist is empty.</label>
+        </control>
+        
+        <control type="label" id="1130">
+			<visible>false</visible>
+			<width>600</width>
+            <posx>350</posx>
+            <posy>160</posy>
+            <font>font23b</font>
+            <align>left</align>
+            <label>Your search didn't match anything.</label>
         </control>
 		
 		<!-- List of video items -->
