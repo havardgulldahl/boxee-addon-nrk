@@ -145,7 +145,6 @@ else:
 <![CDATA[
 list = mc.GetActiveWindow().GetList(100)
 item = list.GetItem(list.GetFocusedItem())
-item.Dump()
 menuClicked(item)
 ]]>
 				</onclick>
@@ -243,7 +242,6 @@ menuClicked(item)
 <![CDATA[
 list = mc.GetActiveWindow().GetList(110)
 item = list.GetItem(list.GetFocusedItem())
-item.Dump()
 play(item)
 ]]>
 				</onclick>
@@ -483,18 +481,36 @@ $INFO[Container(130).ListItem(0).property(custom:id),ID: ]
 			 <onleft>130</onleft>
 			 <onright>-</onright>
 			 <control type="button" id="1351">
-			   <label>Merk som favoritt</label>
+			   <label>57006</label>
 			   <width>300</width>
 			   <height>20</height>
 			   <font>font18</font>
 			   <align>center</align>
+			   <onclick lang="python">
+<![CDATA[
+videoitems = mc.GetActiveWindow().GetList(130)
+videoitem = videoitems.GetItem(list.GetFocusedItem())
+print "adding favorite"
+addToSavedList(videoitem, "favorites")
+]]>
+			   </onclick>
 			 </control>
 			 <control type="button" id="1352">
-			   <label>Legg i ko</label>
+			   <label>526</label>
 			   <width>300</width>
 			   <height>20</height>
 			   <font>font18</font>
 			   <align>center</align>
+			   <onclick lang="python">
+<![CDATA[
+videoitems = mc.GetActiveWindow().GetList(130)
+videoitem = videoitems.GetItem(list.GetFocusedItem())
+print "adding to playlist"
+print videoitem
+
+addToSavedList(videoitem, "playlist")
+]]>
+			   </onclick>
 			 </control>
 			 <control type="button" id="1353">
 			   <label>Finn resten av serien</label>

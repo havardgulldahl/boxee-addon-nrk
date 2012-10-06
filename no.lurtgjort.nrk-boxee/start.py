@@ -26,8 +26,6 @@ LABEL_FAVORITES = 52111
 LABEL_PLAYLIST = 559
 LABEL_SEARCH = 137
 
-config = mc.GetApp().GetLocalConfig() # set up persistant store for playlist and favorites
-
 # some defaults
 MAX_SAVED_LIST_LENGTH = 10
 
@@ -80,7 +78,7 @@ def menuClicked(item):
 		if len(videoitems) > 0:
 			listVideoItems(videoitems)
 		else:
-			mc.GetActiveWindow().GetLabel(1120).SetVisible(True)
+			showError(1120)
 	elif lbl == LABEL_GENRES:
 		listGenres()
 	elif lbl == LABEL_SEARCH:
@@ -88,8 +86,18 @@ def menuClicked(item):
 		if len(videoitems) > 0:
 			listVideoItems(videoitems)
 		else:
-			mc.GetActiveWindow().GetLabel(1130).SetVisible(True)
+			showError(1130)
 	mc.HideDialogWait()
+	
+def showError(controlid):
+	"Get a control id for an error label and make sure it's visible, and hide all other controls"
+	mc.GetActiveWindow().GetList(110).SetVisible(False)
+	mc.GetActiveWindow().GetList(120).SetVisible(False)
+	mc.GetActiveWindow().GetList(130).SetVisible(False)
+	mc.GetActiveWindow().GetLabel(1110).SetVisible(False)
+	mc.GetActiveWindow().GetLabel(1120).SetVisible(False)
+	mc.GetActiveWindow().GetLabel(1130).SetVisible(False)
+	mc.GetActiveWindow().GetLabel(controlid).SetVisible(True)
 	
 def listLive():
 	items = mc.ListItems()
@@ -166,40 +174,47 @@ def listGenres():
 	mc.GetActiveWindow().GetList(120).SetFocus()
 
 def getSavedList(kind):
+	config = mc.GetApp().GetLocalConfig() # hook up to persistant store for playlist and favorites
 	items = mc.ListItems()
 	if kind == LABEL_PLAYLIST: # get current playlist
 		jsonlist = config.GetValue("playlist")
+		simpleitems = config.Implode('||', 'playlist').split('||')
 	elif kind == LABEL_FAVORITES: # get favorited items or shows
 		jsonlist = config.GetValue("favorites")
-	print "got json list from storage: %s" % repr(jsonlist)
-	try:
-		simpleitems = simplejson.loads(jsonlist)
-	except ValueError: # empty list
-		return mc.ListItems()
+		simpleitems = config.Implode('||', 'favorites').split('||')
+	# print "got json list from storage: %s" % repr(jsonlist)
+	print "got list from storage: %s" % repr(simpleitems)
+	# try:
+		# simpleitems = simplejson.loads(jsonlist)
+	# except ValueError: # empty list
+		# return mc.ListItems()
 	for i in simpleitems:
-		items.append(structToItem(i))
+		ii = {'id':i}
+		items.append(simplestructToItem(ii))
 	return items
 		
 def addToSavedList(item, listname):
-	print "addTo saved list: %s path:%s listname:%s" % (item, item.GetPath(), listname)
-	newpath = item.GetPath()
-	if not newpath:
-		newpath = getPathForId(item.GetProperty("id")) 
-	new = {'Url': newpath, 'Title':item.GetTitle(), 'ImageUrl': item.GetProperty('ThumbUrl')}
-	try:
-		simpleitems = simplejson.loads(config.GetValue(listname)) # get previous items, decode it as a json list
-	except ValueError: # no list saved before
-		simpleitems = []
-	if len(simpleitems) > MAX_SAVED_LIST_LENGTH:
-		if mc.ShowDialogConfirm('NRK', 'Your list is full. Would you like to replace the first item?', 'Cancel', 'Yes'):
-			simpleitems = simpleitems[1:]
-		else:
-			return False
-	simpleitems.append(new)
-	print "adding item to list %s" % simpleitems
-	config.SetValue(simplejson.dumps(simpleitems), listname)
+	config = mc.GetApp().GetLocalConfig() # hook up to persistant store for playlist and favorites
+	print "addTo saved list: %s listname:%s" % (item.GetLabel(), listname)
+	print "currentlist: --%s--" % repr(config.Implode(", ", listname))
+	config.PushBackValue(listname, item.GetProperty('id'))
+	
+	# new = {'Id': item.GetProperty("id"), 'ImageUrl': item.GetProperty('ThumbUrl')}
+	# try:
+		# simpleitems = simplejson.loads(config.GetValue(listname)) # get previous items, decode it as a json list
+	# except ValueError: # no list saved before
+		# simpleitems = []
+	# if len(simpleitems) > MAX_SAVED_LIST_LENGTH:
+		# if mc.ShowDialogConfirm('NRK', 'Your list is full. Would you like to replace the first item?', 'Cancel', 'Yes'):
+			# simpleitems = simpleitems[1:]
+		# else:
+			# return False
+	# simpleitems.append(new)
+	# print "adding item to list %s" % repr(simplejson.dumps(simpleitems))
+	# config.SetValue(simplejson.dumps(simpleitems), listname)
+	# print "new config value"
+	print "newlist: --%s--" % repr(config.Implode(", ", listname))
 	return True
-		
 		
 def genreClicked(genre):
 	# print "genre cliked: %s" % genre.GetLabel()
@@ -215,14 +230,27 @@ def getRecent():
 	url = "http://tv.nrk.no/listobjects/recentlysent.json/page/0"
 	return listObjectsToItems(url)
 
+def simplestructToItem(struct):
+	"We only have a id, we need to look it up"
+	metadata = getMetadataForId(struct['id'])
+	# {u'availableFrom': 1349549912000L, u'startBitrateIndex': 3, u'available': True, u'mediaAnalyticScript': {u'category': u'dokumentar-og-fakta', u'title': u'den-vidunderlige-kysten-78', u'playerId': u'flash', u'deliveryType': u'O', u'contentLength': u'55-60 min', u'show': u'den-vidunderlige-kysten', u'pageReferrer': u'document.referrer', u'pageUrl': u'document.URL', u'device': u'desktop'}, u'playerType': u'flash', u'mediaURL': u'http://nordond20b-f.akamaihd.net/z/no/open/a2/a2047f62cde7cc5c1534d159065fa1f7d41129a6/a2047f62cde7cc5c1534d159065fa1f7d41129a6_,141,316,563,1266,2250,.mp4.csmil/manifest.f4m', u'maximumBitrateIndex': 4, u'availableTo': 1352195100000L, u'title': u'Den vidunderlige kysten', u'mediaElementType': u'Program', u'mediaType': u'Video', u'messageType': u'NoMessage', u'imageId': u'V5bAD_fJWWJtfA55ofthKQ', u'live': False, u'geoBlocked': True, u'scoresStatsScript': {u'springStreamContentType': u'desktop', u'springStreamSite': u'nrkstream', u'springStreamStream': u'programspiller/odm/dokumentar-og-fakta/den-vidunderlige-kysten/s01e07.den-vidunderlige-kysten.koid24002611', u'springStreamProgramId': u'KOID24002611'}, u'legalAge': u'A', u'id': u'koid24002611', u'channel': False, u'description': u'Br. dokumentarserie. Det britiske kystprogrammet er kommet til naboen i nord\xf8st, Norge. Her utforskes vestlandskysten og den overhengende rasfaren som truer den vakre bygda Geiranger. Mark Horton leter etter opphavet til vikingskipets design. Er det en forbindelse mellom den og moderne b\xe5ter? (Coast) (7:8)'}
+	if metadata.has_key('mediaURL'):
+		struct['MediaURL'] = metadata['mediaURL']
+	if metadata.has_key('description'):
+		struct['Description'] = metadata['description']
+	if metadata.has_key('title'):
+		struct['Title'] = metadata['title']
+	struct['Url'] = '/program/%s' % struct['id']
+	return structToItem(struct)
+	
 def structToItem(i):
 	item = mc.ListItem(mc.ListItem.MEDIA_UNKNOWN) # MEDIA_UNKOWN is the only type where http thumbnails show up
-	print repr(i['Url'])
 	item.SetLabel(utf8(i['Title']))
 	item.SetTitle(utf8(i['Title']))
-	item.SetThumbnail(utf8(i['ImageUrl']))
-	item.SetProperty('thumbUrl', utf8(i['ImageUrl']))
 	item.SetProperty('url', utf8(i['Url']))
+	if i.has_key('ImageUrl'):
+		item.SetThumbnail(utf8(i['ImageUrl']))
+		item.SetProperty('thumbUrl', utf8(i['ImageUrl']))
 	if i.has_key('Description'):
 		item.SetDescription(utf8(i['Description']))
 	if i.has_key('Genres') and len(i['Genres'])>0:
@@ -230,9 +258,13 @@ def structToItem(i):
 		item.SetGenre(utf8(i['Genres'][0]))
 	if i.has_key('ViewCount'):
 		item.SetProperty('viewCount', utf8(i['ViewCount']))
+	if i.has_key('MediaURL'):
+		item.SetPath(utf8(i['MediaURL']))
+	if i.has_key('id'):
+		item.SetProperty('id', utf8(i['id']))
 	iteminfo = parsePath(utf8(i['Url']))
-	if iteminfo.has_key('id'): # this will get us our mediaURL later on
-		item.SetProperty('id', iteminfo['id'])
+	if not i.has_key('id') and iteminfo.has_key('id'): 
+		item.SetProperty('id', iteminfo['id']) # this will get us our mediaURL later on
 	if iteminfo.has_key('showtitle'): # TV Show title
 		item.SetProperty('showtitle', iteminfo['showtitle'])
 	if iteminfo.has_key('airdate'): # date first aired, datetime.date object
@@ -416,7 +448,7 @@ def play(item):
 
 def getMetadataForId(videoid):		
 	url = "http://nrk.no/serum/api/video/%s" % videoid
-	print "getting path for id: %s" % url
+	print "getting metadata for id: %s" % url
 	json = simplejson.loads(GET(url, Accept='application/json').read().decode('utf-8'))
 	print json
 	return json
