@@ -189,7 +189,8 @@ def getSavedList(kind):
 	# except ValueError: # empty list
 		# return mc.ListItems()
 	for i in simpleitems:
-		ii = {'id':i}
+		ii = {'id':i, 'ThumbUrl':'http://gfx.nrk.no%s' % config.GetValue(i)}
+		print "got simpleitem from list: %s " % ii
 		items.append(simplestructToItem(ii))
 	return items
 		
@@ -198,21 +199,7 @@ def addToSavedList(item, listname):
 	print "addTo saved list: %s listname:%s" % (item.GetLabel(), listname)
 	print "currentlist: --%s--" % repr(config.Implode(", ", listname))
 	config.PushBackValue(listname, item.GetProperty('id'))
-	
-	# new = {'Id': item.GetProperty("id"), 'ImageUrl': item.GetProperty('ThumbUrl')}
-	# try:
-		# simpleitems = simplejson.loads(config.GetValue(listname)) # get previous items, decode it as a json list
-	# except ValueError: # no list saved before
-		# simpleitems = []
-	# if len(simpleitems) > MAX_SAVED_LIST_LENGTH:
-		# if mc.ShowDialogConfirm('NRK', 'Your list is full. Would you like to replace the first item?', 'Cancel', 'Yes'):
-			# simpleitems = simpleitems[1:]
-		# else:
-			# return False
-	# simpleitems.append(new)
-	# print "adding item to list %s" % repr(simplejson.dumps(simpleitems))
-	# config.SetValue(simplejson.dumps(simpleitems), listname)
-	# print "new config value"
+	config.SetValue(item.GetProperty('id'), urlparse.urlparse(item.GetProperty('ThumbUrl'))[2]) # add the thumbnail (just the path) to 'cache'
 	print "newlist: --%s--" % repr(config.Implode(", ", listname))
 	return True
 		
@@ -235,7 +222,7 @@ def simplestructToItem(struct):
 	metadata = getMetadataForId(struct['id'])
 	# {u'availableFrom': 1349549912000L, u'startBitrateIndex': 3, u'available': True, u'mediaAnalyticScript': {u'category': u'dokumentar-og-fakta', u'title': u'den-vidunderlige-kysten-78', u'playerId': u'flash', u'deliveryType': u'O', u'contentLength': u'55-60 min', u'show': u'den-vidunderlige-kysten', u'pageReferrer': u'document.referrer', u'pageUrl': u'document.URL', u'device': u'desktop'}, u'playerType': u'flash', u'mediaURL': u'http://nordond20b-f.akamaihd.net/z/no/open/a2/a2047f62cde7cc5c1534d159065fa1f7d41129a6/a2047f62cde7cc5c1534d159065fa1f7d41129a6_,141,316,563,1266,2250,.mp4.csmil/manifest.f4m', u'maximumBitrateIndex': 4, u'availableTo': 1352195100000L, u'title': u'Den vidunderlige kysten', u'mediaElementType': u'Program', u'mediaType': u'Video', u'messageType': u'NoMessage', u'imageId': u'V5bAD_fJWWJtfA55ofthKQ', u'live': False, u'geoBlocked': True, u'scoresStatsScript': {u'springStreamContentType': u'desktop', u'springStreamSite': u'nrkstream', u'springStreamStream': u'programspiller/odm/dokumentar-og-fakta/den-vidunderlige-kysten/s01e07.den-vidunderlige-kysten.koid24002611', u'springStreamProgramId': u'KOID24002611'}, u'legalAge': u'A', u'id': u'koid24002611', u'channel': False, u'description': u'Br. dokumentarserie. Det britiske kystprogrammet er kommet til naboen i nord\xf8st, Norge. Her utforskes vestlandskysten og den overhengende rasfaren som truer den vakre bygda Geiranger. Mark Horton leter etter opphavet til vikingskipets design. Er det en forbindelse mellom den og moderne b\xe5ter? (Coast) (7:8)'}
 	if metadata.has_key('mediaURL'):
-		struct['MediaURL'] = metadata['mediaURL']
+		struct['MediaURL'] = getPathForMediaURL(metadata['mediaURL'])
 	if metadata.has_key('description'):
 		struct['Description'] = metadata['description']
 	if metadata.has_key('title'):
@@ -450,19 +437,21 @@ def getMetadataForId(videoid):
 	url = "http://nrk.no/serum/api/video/%s" % videoid
 	print "getting metadata for id: %s" % url
 	json = simplejson.loads(GET(url, Accept='application/json').read().decode('utf-8'))
-	print json
+	# print json
 	return json
 		
-def getPathForId(videoid, bitrate=3):
+def getPathForId(videoid, bitrate=2):
 	if bitrate > 4: bitrate = 3
 	json = getMetadataForId(videoid)
-	url = utf8(json['mediaURL'])
-	print repr(url)
-	url = url.replace('/z/', '/i/', 1)
+	url = getPathForMediaURL(utf8(json['mediaURL']))
+	return url
+
+def getPathForMediaURL(mediaURL, bitrate=2):
+	url = mediaURL.replace('/z/', '/i/', 1)
 	url = url.rsplit('/', 1)[0]
 	url = url + '/index_%s_av.m3u8' % bitrate
 	return url
-		
+	
 def setBitrate(idx):
 	print "setbitrate:%s" % idx
 
