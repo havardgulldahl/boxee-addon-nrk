@@ -28,9 +28,9 @@ NRKSTREAMS = { # from takoi in http://forum.xbmc.org/showthread.php?tid=52824&pa
 NRKBITRATES = ['380','659','1394','2410','3660']
 
 NRKLIVESTREAMS = {
-  "NRK1": "http://nrk1us-f.akamaihd.net/i/nrk1us_0@79328/index_%s_av-b.m3u8?sd=10&rebase=on",
-  "NRK2": "http://nrk2us-f.akamaihd.net/i/nrk2us_0@79327/index_%s_av-b.m3u8?sd=10&rebase=on",
-  "NRK3": "http://nrk3us-f.akamaihd.net/i/nrk3us_0@79326/index_%s_av-b.m3u8?sd=10&rebase=on",
+  "NRK1": "http://nrk1us-f.akamaihd.net/i/nrk1us_0@79328/index_%s_av-p.m3u8?sd=10&rebase=on",
+  "NRK2": "http://nrk2us-f.akamaihd.net/i/nrk2us_0@79327/index_%s_av-p.m3u8?sd=10&rebase=on",
+  "NRK3": "http://nrk3us-f.akamaihd.net/i/nrk3us_0@79326/index_%s_av-p.m3u8?sd=10&rebase=on",
 }
 
 def LiveChannel(channelname, bitrate=2):
