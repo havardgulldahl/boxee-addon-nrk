@@ -408,9 +408,11 @@ genreClicked(item)
 			<content type="action">
 				<onclick lang="python">
 <![CDATA[
-list = mc.GetActiveWindow().GetList(130)
-item = list.GetItem(list.GetFocusedItem())
-play(item)
+#list = mc.GetActiveWindow().GetList(130)
+#item = list.GetItem(list.GetFocusedItem())
+#play(item)
+print "show play dialog"
+mc.ActivateWindow(14001)
 ]]>
 				</onclick>
 			</content>
@@ -461,64 +463,11 @@ play(item)
 			<label>$INFO[Container(130).ListItem(0).Date,Dato: ] 
 $INFO[Container(130).ListItem(0).property(custom:season),Sesong: ]$INFO[Container(130).ListItem(0).property(custom:episode),$COMMA episode ]
 $INFO[Container(130).ListItem(0).Description]
-$INFO[Container(130).ListItem(0).property(custom:viewCount),Sett , ganger]
 $INFO[Container(130).ListItem(0).property(custom:url),Url: ]
 $INFO[Container(130).ListItem(0).property(custom:id),ID: ]
 </label>
 			<textcolor>white</textcolor>
 			<multiline>true</multiline>
-		</control>
-		<control type="grouplist" id="135">
-			 <posx>880</posx>
-			 <posy>600</posy>
-			 <width>340</width>
-			 <height>120</height>
-			 <orientation>vertical</orientation>
-			 <visible>Control.IsVisible(130)</visible>
-			 <itemgap>10</itemgap>
-			 <onup>100</onup>
-			 <ondown>-</ondown>
-			 <onleft>130</onleft>
-			 <onright>-</onright>
-			 <control type="button" id="1351">
-			   <label>57006</label>
-			   <width>300</width>
-			   <height>20</height>
-			   <font>font18</font>
-			   <align>center</align>
-			   <onclick lang="python">
-<![CDATA[
-videoitems = mc.GetActiveWindow().GetList(130)
-videoitem = videoitems.GetItem(list.GetFocusedItem())
-print "adding favorite"
-addToSavedList(videoitem, "favorites")
-]]>
-			   </onclick>
-			 </control>
-			 <control type="button" id="1352">
-			   <label>526</label>
-			   <width>300</width>
-			   <height>20</height>
-			   <font>font18</font>
-			   <align>center</align>
-			   <onclick lang="python">
-<![CDATA[
-videoitems = mc.GetActiveWindow().GetList(130)
-videoitem = videoitems.GetItem(list.GetFocusedItem())
-print "adding to playlist"
-print videoitem
-
-addToSavedList(videoitem, "playlist")
-]]>
-			   </onclick>
-			 </control>
-			 <control type="button" id="1353">
-			   <label>Finn resten av serien</label>
-			   <width>300</width>
-			   <height>20</height>
-			   <font>font18</font>
-			   <align>center</align>
-			 </control>
 		</control>
 		 
 		<!-- End preview pane  -->
